@@ -1,0 +1,16 @@
+***************
+*** 197,202 ****
+      nnoremap <buffer> d       $:GitDiff <cfile><Enter>
+      nnoremap <buffer> r       $:GitRm   <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+      nnoremap <buffer> -       $:silent  !git reset HEAD -- ^R=expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
+      nnoremap <buffer> e       $:e       <cfile><Enter>
+      nnoremap <buffer> c       :q<Enter>:GitCommit<Enter>i
+      nnoremap <buffer> q       :q<Enter>
+--- 197,203 ----
+      nnoremap <buffer> d       $:GitDiff <cfile><Enter>
+      nnoremap <buffer> r       $:GitRm   <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+      nnoremap <buffer> -       $:silent  !git reset HEAD -- ^R=expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
++     nnoremap <buffer> _       $:GitCheckout -- <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+      nnoremap <buffer> e       $:e       <cfile><Enter>
+      nnoremap <buffer> c       :q<Enter>:GitCommit<Enter>i
+      nnoremap <buffer> q       :q<Enter>
