@@ -3,6 +3,7 @@ set shiftwidth=4
 " set background=dark
 set expandtab
 set autoindent
+set title
 " For us traditional ctrl-] ctrl-t TAGS guys..., though TListToggle
 " comes in handy too, and is added later. Maintained with the 'rtags' shell
 " function.
