@@ -1,3 +1,0 @@
-export PATH=/opt/local/bin:${PATH}
-# mac top is fucking stupid
-alias top='top -s5 -o cpu -R -F'
