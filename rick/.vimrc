@@ -16,6 +16,7 @@ set list lcs=tab:·⁖,trail:¶
 :syntax enable
 :retab
 
+" FIXME: Get ruby % matching right.
 " from http://items.sjbach.com/319/configuring-vim-right
 " Trying to get %-matching to work right for ruby. Also installed
 " ftplugin/ruby.vim from 
@@ -23,9 +24,9 @@ set list lcs=tab:·⁖,trail:¶
 " still no-workie
 " I ended up adding matchit in as a plugin using :help matchit (it's
 " an example), and now have that plugin -- but still no ruby.
-runtime macros/matchit.vim
+" runtime macros/matchit.vim
 
-" From git.../user/jason/vim/.vimrc:
+" From Jason Snell's CC .vimrc:
 
 autocmd BufReadPost *
       \ if ! exists("g:leave_my_cursor_position_alone") |
@@ -37,7 +38,10 @@ autocmd BufReadPost *
 "set background=dark
 
 " Copy visual selection to osx clipboard
-map <C-c> ygv:!pbcopy<CR>ugv
+"map <C-c> ygv:!pbcopy<CR>ugv
+" Copy visual to X windows clipboard. Use -selection clipboard to 
+" go to the Gnome clipboard later when unifying keystrokes.
+map <C-c> ygv:!xclip -i<CR>ugv
 
 " kill ring
 map <leader>k :YRShow<CR>
