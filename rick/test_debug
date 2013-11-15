@@ -1,2 +1,3 @@
 puts barf
 debugger; 1
+p barf
