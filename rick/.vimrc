@@ -11,8 +11,14 @@ set tags=./TAGS,./TAGS.uncommon,./tags,$HOME/TAGS,$HOME/TAGS.uncommon
 set wildmode=longest:full
 set wildmenu
 set modelines=4
+
+" < Handle whitespace issues:
 " Show tabs as odd character, same with trailing spaces or tabs.
 set list lcs=tab:·⁖,trail:¶
+" Remove trailing whitespace on save for files I care about
+autocmd FileType rb,ruby,slim,txt,c,cpp,java,php autocmd BufWritePre <buffer> :%s/\s\+$//e
+" >
+
 :syntax enable
 :retab
 
