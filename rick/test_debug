@@ -1,3 +1,1 @@
-puts barf
-debugger; 1
-p barf
+  p barf

@@ -1,5 +1,5 @@
 set tabstop=8
-set shiftwidth=4
+set shiftwidth=2
 " set background=dark
 set expandtab
 set autoindent
