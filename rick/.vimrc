@@ -32,6 +32,10 @@ autocmd FileType rb,ruby,slim,txt,c,cpp,java,php autocmd BufWritePre <buffer> :%
 " an example), and now have that plugin -- but still no ruby.
 " runtime macros/matchit.vim
 
+" Add pathogen so more plugins (especially the slim colorer) work:
+" https://github.com/tpope/vim-pathogen
+execute pathogen#infect()
+
 " From Jason Snell's CC .vimrc:
 
 autocmd BufReadPost *
