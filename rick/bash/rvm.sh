@@ -1,0 +1,1 @@
+/home/rcobb/.rvm/scripts/rvm
