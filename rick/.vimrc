@@ -16,7 +16,7 @@ set modelines=4
 " Show tabs as odd character, same with trailing spaces or tabs.
 set list lcs=tab:·⁖,trail:¶
 " Remove trailing whitespace on save for files I care about
-autocmd FileType rb,ruby,slim,txt,c,cpp,java,php autocmd BufWritePre <buffer> :%s/\s\+$//e
+autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >
 
 :syntax enable
