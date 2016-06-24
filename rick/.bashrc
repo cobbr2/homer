@@ -37,3 +37,7 @@ path_push ~/bin
 for setup in ~/homer/rick/bash/*.sh ; do
   . $setup
 done
+
+if [ -n "$rvm_path" ] ; then
+  cd $PWD # Get the .rvm_* files read
+fi
