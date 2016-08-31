@@ -11,5 +11,4 @@ gnome-terminal   \
   --tab -e 'gnome-run warehouse rake kinesis_subscriber:ingestion:start' -t 'warehouse k'   \
   --tab -e 'gnome-run stone rails s' -t 'stone s'       \
   --tab -e 'gnome-run stone rake jobs:work' -t 'stone dj'
-  --tab -e 'gnome-run edith rake dev:run' -t 'edith'
 }
