@@ -4,16 +4,18 @@ honesty-login() {
 }
 
 is-ipsec-up() {
-  if sudo ipsec status | grep 'Security Associations (0 up, 0 connecting)' ; then
-    false
+  # May be able to get by with 0 associations 0 connecting, but not trying that
+  # yet
+  if sudo ipsec status | grep 'Security Associations' ; then
+    return 0
   else
-    true
+    return 1
   fi
 }
 
 honesty-development() {
   if is-ipsec-up >/dev/null; then
-    echo "No dice: ipsec is up" 1>&2
+    echo "No dice: ipsec is running" 1>&2
     return 1
   fi
   pushd ${GR_HOME}/cargo >/dev/null
