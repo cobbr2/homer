@@ -1,1 +1,1 @@
-IPSEC_SECRETS_FILE=/etc/ipsec.secrets
+export IPSEC_SECRETS_FILE=/etc/ipsec.secrets
