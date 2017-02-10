@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 function gnome_up () {
 gnome-terminal   \
-  --tab -e 'env' -t 'debug' \
+  --tab -e 'gnome-run . env' -t 'debug' \
   --tab -e 'gnome-run edith rake dev:run' -t 'edith' \
   --tab -e 'gnome-run rogers rails s' -t 'rogers r'   \
   --tab -e 'gnome-run jarvis rails s' -t 'jarvis r'   \

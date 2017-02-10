@@ -19,6 +19,9 @@ set list lcs=tab:·⁖,trail:¶
 autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >
 
+" No Modula 2 for me!
+autocmd BufNewFile,BufRead *.md set filetype=markdown
+
 :syntax enable
 :retab
 

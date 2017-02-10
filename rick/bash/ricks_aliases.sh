@@ -50,8 +50,8 @@ grepall () {
 }
 
 rtags () {
-  common_repos="${HOME}/frick ${HOME}/jarvis"
-  uncommon_repos="${HOME}/engineering"
+  common_repos="${HOME}/frick ${HOME}/jarvis ${HOME}/stone"
+  uncommon_repos="${HOME}/engineering ${HOME}/honesty ${HOME}/cargo"
 
   # TODO: Get it to search the right gem_home too
   find $common_repos -type f  | ctags -f ~/TAGS -L - 2>&1 | grep -v 'ignoring null tag'

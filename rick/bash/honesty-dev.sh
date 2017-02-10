@@ -33,3 +33,11 @@ honesty-kill-dockers() {
   fi
   docker kill $zombies
 }
+
+honesty-rm-exited-containers() {
+  old_exited_containers=$(docker ps -a | awk '/weeks ago *Exited/ { print $1 }')
+  if [ -z "${old_exited_containers}" ] ; then
+    return 0
+  fi
+  docker rm $old_exited_containers
+}
