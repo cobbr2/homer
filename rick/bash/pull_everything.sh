@@ -14,3 +14,23 @@ FOO
     popd >/dev/null
   done
 }
+
+forin() {
+  dirs=$1
+  shift
+  for dir in $dirs ; do
+    if [ ! -d ${dir} ] ; then
+      echo "Not a directory: ${dir}"
+      continue
+    fi
+    pushd ${dir} >/dev/null
+    sed 's/^ *//' <<FOO
+      ---------------
+      $(pwd)
+      ---------------
+FOO
+    eval $@
+    popd >/dev/null
+  done
+}
+# See also `devdirs` in ricks_aliases

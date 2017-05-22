@@ -44,7 +44,7 @@ devdirs () {
 grepall () {
   for dir in $(devdirs) ; do
     pushd $dir >/dev/null
-    GIT_PAGER=cat gg $@
+    GIT_PAGER="sed 's;^;${dir}/;'" gg $@
     popd >/dev/null
   done
 }

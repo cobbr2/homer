@@ -35,7 +35,7 @@ honesty-kill-dockers() {
 }
 
 honesty-rm-exited-containers() {
-  old_exited_containers=$(docker ps -a | awk '/weeks ago *Exited/ { print $1 }')
+  old_exited_containers=$(docker ps -a | awk '/ago *Exited/ { print $1 }')
   if [ -z "${old_exited_containers}" ] ; then
     return 0
   fi
