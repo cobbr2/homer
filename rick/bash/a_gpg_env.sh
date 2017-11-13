@@ -26,3 +26,18 @@ function load_keys() {
   # agent puts out during the prompting process. Haven't figured
   # out which one it is, gave up for now.
 }
+
+function gpg_import_keys () {
+  pushd "${GR_HOME}/engineering"        >/dev/null 2>&1
+  if [[ "$(pwb)" != "master" ]] ; then
+    echo "Engineering is not on master branch" 1>&2
+  else
+    git pull
+    find ${GR_HOME}/engineering/gpg/public/ -type f -name '*.pub' -exec gpg --import {} ';'
+  fi
+  popd >/dev/null 2>&1
+}
+
+function gpgrep() {
+  find . -type f -name '*.gpg' -exec sh -c "gpg -q -d --no-tty \"{}\" | grep -InH --color=auto --label=\"{}\" $*" \;
+}
