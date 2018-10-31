@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+export MEMCACHED='gr-ca-ccziiuyjxwll.seu7j1.cfg.use1.cache.amazonaws.com:11211'
+
+function memcache() {
+  IFS=':'
+  read -ra address_parts <<< "${MEMCACHED}"
+  unset IFS
+  telnet "${address_parts[@]}"
+}

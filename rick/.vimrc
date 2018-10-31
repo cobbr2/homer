@@ -7,7 +7,8 @@ set title
 " For us traditional ctrl-] ctrl-t TAGS guys..., though TListToggle
 " comes in handy too, and is added later. Maintained with the 'rtags' shell
 " function.
-set tags=./TAGS,./TAGS.uncommon,./tags,$HOME/TAGS,$HOME/TAGS.uncommon
+"set tags=TAGS;,tags;,./TAGS,./TAGS.uncommon,./tags,$HOME/TAGS,$HOME/TAGS.uncommon
+set tags=TAGS;,tags;
 set wildmode=longest:full
 set wildmenu
 set modelines=4
@@ -16,7 +17,7 @@ set modelines=4
 " Show tabs as odd character, same with trailing spaces or tabs.
 set list lcs=tab:·⁖,trail:¶
 " Remove trailing whitespace on save for files I care about
-autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown autocmd BufWritePre <buffer> :%s/\s\+$//e
+autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown,yml autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >
 
 " No Modula 2 for me!

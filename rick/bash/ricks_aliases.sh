@@ -44,9 +44,15 @@ devdirs () {
 grepall () {
   for dir in $(devdirs) ; do
     pushd $dir >/dev/null
-    GIT_PAGER="sed 's;^;${dir}/;'" gg $@
+    GIT_PAGER="sed 's;^;${dir}/;'" gg "${@}"
     popd >/dev/null
   done
+}
+
+ltags() {
+  cdr >/dev/null
+  ctags -Rf TAGS
+  popd >/dev/null
 }
 
 rtags () {
@@ -80,7 +86,7 @@ work () {
 crashed () {
   find ~ -name '*.sw[po]' | xargs rm
   rm ~/*/tmp/pids/*
-  rm ~/jarvis/.zeus.sock
+  rm -f ~/jarvis/.zeus.sock
   rm ~/.mozilla/firefox/*/.parentlock
 }
 

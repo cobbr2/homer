@@ -30,3 +30,8 @@ branch_cleanup () {
 pwb () {
   git status | sed -n -e '/On branch/s;^.* ;;p'
 }
+
+# Needs to be a bin to be used with `git root`. Someday
+git_root() {
+  git rev-parse --show-toplevel
+}

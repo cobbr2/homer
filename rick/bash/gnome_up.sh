@@ -4,6 +4,8 @@ gnome-terminal   \
   --tab -e 'gnome-run . env' -t 'debug' \
   --tab -e 'gnome-run edith rake dev:run' -t 'edith' \
   --tab -e 'gnome-run rogers rails s' -t 'rogers r'   \
+  --tab -e 'gnome-run rogers rake jobs:work' -t 'rogers dj'   \
+  --tab -e 'gnome-run jarvis docker-compose' -t 'jarvis db' \
   --tab -e 'gnome-run jarvis rails s' -t 'jarvis r'   \
   --tab -e 'gnome-run jarvis rake jobs:work' -t 'jarvis dj'   \
   --tab -e 'gnome-run frick rails s' -t 'frick r'   \
