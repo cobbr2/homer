@@ -9,4 +9,8 @@
 
 export AWS_ENVIRONMENT_BETA=1
 
-gpg_agent_working && (aws-environment || aws-environment development)
+if gpg_agent_working ; then
+  aws-environment &>/dev/null || dev-environment --no-tty
+fi
+
+alias s3='aws s3'

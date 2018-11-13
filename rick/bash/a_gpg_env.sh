@@ -1,5 +1,5 @@
 function gpgenv  {
-  $(gpg -o - --use-agent -q ${1:?gpg_file_name})
+  $(gpg -o - --use-agent --quiet ${1:?gpg_file_name})
 }
 
 function gpg_agent_working {
@@ -21,7 +21,7 @@ function load_keys() {
   *)    key_pattern=$1 ; shift; files=$* ;;
   esac
 
-  export $(gpg --use-agent -o - $files 2>/dev/null | sed -n -e 's/#.*$//' -e "/${key_pattern}/p")
+  export $(gpg --use-agent -q --no-tty -o - $files 2>/dev/null | sed -n -e 's/#.*$//' -e "/${key_pattern}/p")
   # Clear the terminal screen of the cruft that either gpg or its
   # agent puts out during the prompting process. Haven't figured
   # out which one it is, gave up for now.
