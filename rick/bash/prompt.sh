@@ -32,15 +32,23 @@ prompt_function() {
   # use "${prompt_color}\$${RESET}" instead of "\$" below
   aws_env=$(aws-environment)
   aws_color_off='tput sgr 0'
-  if [[ $aws_env == '' || $aws_env == 'development' ]] ; then
-    aws_color_on='tput sgr 0'
-  elif [[ $aws_env == 'production' ]] ; then
-    aws_color_on='tput setab 1' # Red
-  elif [[ $aws_env == 'uat' ]] ; then
-    aws_color_on='tput setab 3' # Yellow/orange
-  else
-    aws_color_on='tput setab 7' # Grey
-  fi
+  case "${aws_env}" in
+    *production*)
+      aws_color_on='tput setab 1' # Red
+      ;;
+    *uat*)
+      aws_color_on='tput setab 3' # Yellow/orange
+      ;;
+    *integration3*)
+      aws_color_on='tput setab 4' # Blue
+      ;;
+    *dev*)
+      aws_color_on='tput sgr 0' # Nada
+      ;;
+    *)
+      aws_color_on='tput setab 7' # Grey
+      ;;
+  esac
 
   if test $(git status 2> /dev/null | grep -c :) -eq 0; then
     git_color="${GREEN}"
