@@ -20,11 +20,14 @@ branch_cleanup () {
     branch_excludes="grep -v ${1}"
   fi
   git remote update --prune
-  git checkout master
-  git merge origin/master
-  # At GR, don't push the deletion to remote, since
-  # we delete branches on merge.
-  git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 --no-run-if-empty git branch -d
+  if git checkout master ; then
+    git merge origin/master
+    # At GR, don't push the deletion to remote, since
+    # we delete branches on merge.
+    git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 --no-run-if-empty git branch -d
+  else
+    echo $(color red Get your branch clean first!)
+  fi
 }
 
 pwb () {

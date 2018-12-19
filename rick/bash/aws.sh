@@ -8,6 +8,7 @@
 #export EC2_URL=https://ec2.us-east-1.amazonaws.com
 
 export AWS_ENVIRONMENT_BETA=1
+export AWS_DEFAULT_ROLE=developer
 
 if gpg_agent_working ; then
   aws-environment &>/dev/null || dev-environment --no-tty
