@@ -10,8 +10,10 @@
 export AWS_ENVIRONMENT_BETA=1
 export AWS_DEFAULT_ROLE=developer
 
-if gpg_agent_working ; then
-  aws-environment &>/dev/null || dev-environment --no-tty
+if gpg_agent_working && [ -z "$AWS_ENVIRONMENT" ] ; then
+  dev-environment --no-tty
 fi
 
 alias s3='aws s3'
+
+alias 'aws-refresh'='aws-environment "${AWS_ENVIRONMENT}"'

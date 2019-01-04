@@ -1,7 +1,7 @@
 function athena() {
   # Until we get the provisioning of Athena in Terraform to conform
   # to our S3 bucket conventions:
-  bucket=`aws s3 ls | tee _foo | awk '/aws-athena-query-results/ { print $NF }'`
+  bucket=`aws s3 ls | awk '/aws-athena-query-results/ { print $NF }'`
   if [ -z "${bucket}" ] ;then
     echo "No results bucket found for aws-environment $AWS_ENVIRONMENT"
     return  1
