@@ -1,0 +1,21 @@
+#!/bin/bash
+set -ex
+
+function switch_live_mount() {
+	local camera=${1:?"camera number"}
+	local archive=${2:?"archive name"}
+
+	local mount_parent="/mnt/cameras1/camera${camera}"
+	local home_parent="/home/camera${camera}"
+	local new="new_live"
+
+	mkdir -p "${mount_parent}"/"${new}"
+	chown camera1.camera1 "${mount_parent}"/"${new}"
+
+	umount "${home_parent}"/live
+	mv "${mount_parent}"/live "${mount_parent}"/"${archive}"
+	mv "${mount_parent}"/"${new}" "${mount_parent}"/live
+}
+
+function archive_name() {
+	return "until_$(date +%Y_%m_%D_%H:%M)"

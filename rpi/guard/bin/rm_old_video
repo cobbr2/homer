@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Removes directory trees for camera directories more than <n> 
+# days old
+
+# First implementation: may not perform since it examines all files.
+# OTOH, it removes them all. Let's start with that.
+threshold=${1:-60}
+date -u
+find /mnt/cameras1/archive -mtime "+${threshold}" -type f -print0 | xargs -0 sudo rm -f
+date -u
+find /mnt/cameras1/archive -mtime "+${threshold}" -type d -print0 | xargs -0 sudo rmdir
+date -u

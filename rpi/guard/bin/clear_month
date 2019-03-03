@@ -1,0 +1,47 @@
+#/bin/bash
+
+prefixes="
+        00B8FB0160B9(Camera1)_0_
+        00B8FB0156D3(Camera2)_0_
+        00B8FB0155F6(Camera3)_0_
+        00B8FB0160DC(camera4)_0_
+"
+
+function camera_prefix() {
+	echo "${prefixes}" | grep -i "camera${1:?number}"
+}
+
+function camera_dir() {
+	echo "/mnt/cameras1/camera${1:?number}"
+}
+
+function valid_camera_dir() {
+	local dir=$(camera_dir ${1})
+	if [ ! -d "${dir}" ] ; then
+		echo "Dir not found: ${dir}"
+		exit 2
+	fi
+	echo "${dir}"
+}
+
+function camera_clear_month() {
+	local camera="${1:?number}"
+	local year="${2:?yyyy}"
+	local month="${3:?mm}"
+
+	local camera_dir=$(valid_camera_dir ${camera})
+	local prefix=$(camera_prefix ${camera})
+
+	sudo find "${camera_dir}" 	\
+             -name "${prefix}${year}${month}*" 	\
+             -print \
+	     -delete \
+	     >> "/tmp/deleted_${camera}"
+}
+
+year=${1:?"yyyy"}
+month=${2:?"mm"}
+
+for camera in 1 2 3 4 ; do
+	camera_clear_month "${camera}" "${year}" "${month}"
+done

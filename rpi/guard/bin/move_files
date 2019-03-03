@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+#
+# Takes find output and moves files to the correct camera directory
+# Expect this to be idempotent but run for a *long* time (weeks)
+
+require 'fileutils'
+require 'set'
+
+class DirCache
+  attr_reader :cache, :dry_run
+
+  def initialize(state = [], dry_run: false)
+    @cache = Set.new(state)
+    @dry_run = dry_run
+  end
+
+  def size
+    cache.size
+  end
+
+  def mkdir(path)
+    if cache.include?(path)
+      return path
+    end
+    if dry_run
+      puts "mkdir_p #{path}"
+    else
+      FileUtils.mkdir_p(path)
+    end
+    cache << path
+    path
+  end
+end
+
+class Mover
+  attr_reader :dir, :from_path, :dest_root, :dry_run
+
+  MISMATCH = Class.new(RuntimeError)
+
+  def initialize(from_path, dir, dry_run: false)
+    @dir = dir
+    @from_path = from_path
+    @dest_root = '/mnt/cameras1/archive'
+    @dry_run = dry_run
+  end
+
+  PARSE=%r{
+    (?<source_dir>.*/){0,1}
+    (?<mac>\h{12,12})
+    \(Camera(?<camera>\d+)\)
+    _\d+_
+    (?<year>\d{4,4})(?<month>\d{2,2})(?<day>\d{2,2})
+    (?<hour>\d{2,2})(?<minute>\d{2,2})(?<second>\d{2,2})
+    _
+    (?<microsecond>\d*)
+    (?<extension>\..*)$
+  }ix
+
+  def match
+    @match ||= begin 
+      match = PARSE.match(from_path)
+      raise MISMATCH, "Mismatch #{from_path}" unless match
+      match
+    end
+  end
+
+  def dest_dir
+    "#{dest_root}/#{match[:year]}/#{match[:month]}/#{match[:day]}/Camera#{match[:camera]}/#{match[:hour]}"
+  end
+
+  def dest_basename
+    "#{match[:minute]}_#{match[:second]}_#{match[:microsecond]}#{match[:extension]}"
+  end
+
+  def destination
+    @destination ||= "#{dest_dir}/#{dest_basename}"
+  end
+
+  def call()
+    dir.mkdir(dest_dir) 
+    if dry_run
+      puts "mv #{from_path} #{destination}"
+    else
+      FileUtils.mv(from_path,destination)
+    end
+    return true
+  rescue MISMATCH
+    return false
+  end
+end
+
+if File.basename(__FILE__) == File.basename($0)
+  dry_run = false 
+  dir_cache = DirCache.new(dry_run: dry_run)
+  input = STDIN
+  good = bad = 0
+  input.each_line do |line|
+    line.chomp!
+    if Mover.new(line, dir_cache, dry_run: dry_run).call
+      good += 1
+    else
+      STDERR.puts "Ignored #{line}"
+      bad += 1
+    end
+    if input.lineno % 10000 == 0 
+      puts "#{Time.now}: Examined #{input.lineno}: moved #{good}, ignored #{bad}, cache size #{dir_cache.size}"
+    end
+  end
+  puts "Total: Moved #{good}, ignored #{bad}"
+end
