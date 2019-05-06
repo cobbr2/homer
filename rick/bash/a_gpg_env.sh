@@ -1,10 +1,14 @@
+# Use gpg-agent as my ssh-agent
+export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
+
 function gpgenv  {
   $(gpg -o - --use-agent --quiet ${1:?gpg_file_name})
 }
 
 function gpg_agent_working {
-  # *doesn't* work at the gnome startup world ("can't open /dev/tty"),
-  # at the moment. So ...
+  # *doesn't* work in the gnome startup world -- but tries to prompt
+  # in a way that's super-ugly. So for now, turn it off entirely.
+  return 1
   case $(tty) in
   /dev/pts/* ) return 0 ;;
   * ) return 1 ;;
