@@ -66,3 +66,9 @@ PERL_MM_OPT="INSTALL_BASE=/home/rcobb/perl5"; export PERL_MM_OPT;
 # tabtab source for sls package
 # uninstall by removing these lines or running `tabtab uninstall sls`
 [ -f /home/rcobb/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash ] && . /home/rcobb/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash
+
+#path_push "$HOME/.rvm/bin"
+
+. $HOME/.asdf/asdf.sh
+
+. $HOME/.asdf/completions/asdf.bash
