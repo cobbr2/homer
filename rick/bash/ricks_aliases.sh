@@ -51,7 +51,7 @@ grepall () {
 
 ltags() {
   cdr >/dev/null
-  ctags -Rf TAGS
+  ctags -R --exclude node_modules --exclude tmp
   popd >/dev/null
 }
 
