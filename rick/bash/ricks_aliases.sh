@@ -51,7 +51,11 @@ grepall () {
 
 ltags() {
   cdr >/dev/null
-  ctags -R --exclude node_modules --exclude tmp
+  local also_exclude=''
+  if [ -r .ctagsignore ] ; then
+    also_exclude="--exclude=@.ctagsignore"
+  fi
+  ctags -R $also_exclude --exclude=node_modules --exclude=tmp .
   popd >/dev/null
 }
 

@@ -22,6 +22,31 @@ function redshift-env() {
   source <(gr::redshift::connection "${1}" env)
 }
 
+## Tunnel logins are not finished or patched into the rest of this stuff yet.
+function gr::redshift::tunnel_needed() {
+  cluster=$1
+
+  case "${cluster}" in
+  "stats" | "phi" ) return 0 ;;
+  * )               return 1 ;;
+  esac
+}
+
+function gr::redshift::tunnel_up() {
+  cluster=$1
+
+  if gr::socket::port_in_use 5439 ; then
+    echo "Tunnel appears to already exist, using..." 1>&2
+  else
+    ssh -N -L 5439:"grnds-analytics-dev-stats.ct6witdxdwib.us-east-1.redshift.amazonaws.com":5439 brastion &
+    trap 0 "kill $!"
+  fi
+
+  clip_redshift_credentials stats root
+  psql -U IAM:root postgresql://localhost:5439/stats?sslmode=require
+  #psql --set=sslmode=require -h localhost -p 5439 -U root stats
+}
+
 # Get a connection string or environment-settings for a specific cluster in the
 # current AWS account. Currently, most environments have a `warehouse`,
 # `stats`, and `claims` cluster
