@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+#camera1:x:1001:1001:,,,:/home/camera1:/bin/bash
+#camera2:x:1002:1002:,,,:/home/camera2:/bin/bash
+#camera3:x:1003:1003:,,,:/home/camera3:/bin/bash
+#camera4:x:1005:1005:,,,:/home/camera4:/bin/bash
+
+for i in 1 2 3 4 ; do
+	add_user camera${i}
+done
