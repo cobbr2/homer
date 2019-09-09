@@ -5,6 +5,8 @@
 #camera3:x:1003:1003:,,,:/home/camera3:/bin/bash
 #camera4:x:1005:1005:,,,:/home/camera4:/bin/bash
 
+# This prompted for stuff. The (shared) password is in the MacOS keystore under
+# (guard) passwords on cameras
 for i in 1 2 3 4 ; do
-	add_user camera${i}
+    adduser camera${i}
 done

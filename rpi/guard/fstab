@@ -1,10 +1,5 @@
-proc            /proc           proc    defaults          0       0
-PARTUUID=6dd77c06-01  /boot           vfat    defaults          0       2
-PARTUUID=6dd77c06-02  /               ext4    defaults,noatime  0       1
-# a swapfile is not a swap partition, no line here
-#   use  dphys-swapfile swap[on|off]  for that
-LABEL=CAMERAS1        /mnt/cameras1   ext4    defaults,noatime  0       1
-/mnt/cameras1/camera1/live /home/camera1/live none bind 0 0
-/mnt/cameras1/camera2/live /home/camera2/live none bind 0 0
-/mnt/cameras1/camera3/live /home/camera3/live none bind 0 0
-/mnt/cameras1/camera4/live /home/camera4/live none bind 0 0
+LABEL=CAMERAS1        /mnt/cameras   ext4    defaults,noatime  0       1
+/mnt/cameras/camera1/live /home/camera1/live none bind 0 0
+/mnt/cameras/camera2/live /home/camera2/live none bind 0 0
+/mnt/cameras/camera3/live /home/camera3/live none bind 0 0
+/mnt/cameras/camera4/live /home/camera4/live none bind 0 0

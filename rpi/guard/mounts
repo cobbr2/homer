@@ -1,0 +1,24 @@
+#!/bin/bash
+# run as root
+idempotent_directory() {
+    mount=$1
+    owner=$2
+    if [ ! -d ${mount} ] ; then
+        mkdir ${mount}
+        chown ${owner} ${mount}
+        chmod 755 ${mount}
+    fi
+}
+
+idempotent_directory /mnt/cameras root
+
+for ix in 1 2 3 4 ; do
+    owner=camera${ix}
+    mount=/home/camera${ix}/live
+
+    idempotent_directory $mount $owner
+done
+
+if ! grep 'CAMERAS1' /etc/fstab ; then
+    cat fstab >>/etc/fstab
+fi
