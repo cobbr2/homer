@@ -6,8 +6,18 @@
 # First implementation: may not perform since it examines all files.
 # OTOH, it removes them all. Let's start with that.
 threshold=${1:-60}
+root=${2:-/mnt/cameras/archive}
+
+case "${root}" in
+?)      echo "Check your root"
+        exit 2
+        ;;
+esac
+
 date -u
-find /mnt/cameras/archive -mtime "+${threshold}" -type f -print0 | xargs -0 sudo rm -f
+find "${root}"/* -mtime "+${threshold}" -type f -print0 | xargs -s 32000 -0 sudo rm -f
 date -u
-find /mnt/cameras/archive -mtime "+${threshold}" -type d -print0 | xargs -0 sudo rmdir
+# tac is reverse cat ; rmdir won't delete dirs with anything in them,
+# but it will bitch about them.
+find "${root}"/* -type d -print | tac | xargs -s 32000 sudo rmdir 2>/dev/null
 date -u
