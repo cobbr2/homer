@@ -40,7 +40,7 @@ class Mover
   def initialize(from_path, dir, dry_run: false)
     @dir = dir
     @from_path = from_path
-    @dest_root = '/mnt/cameras1/archive'
+    @dest_root = '/mnt/cameras/archive'
     @dry_run = dry_run
   end
 

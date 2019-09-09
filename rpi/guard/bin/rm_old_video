@@ -7,7 +7,7 @@
 # OTOH, it removes them all. Let's start with that.
 threshold=${1:-60}
 date -u
-find /mnt/cameras1/archive -mtime "+${threshold}" -type f -print0 | xargs -0 sudo rm -f
+find /mnt/cameras/archive -mtime "+${threshold}" -type f -print0 | xargs -0 sudo rm -f
 date -u
-find /mnt/cameras1/archive -mtime "+${threshold}" -type d -print0 | xargs -0 sudo rmdir
+find /mnt/cameras/archive -mtime "+${threshold}" -type d -print0 | xargs -0 sudo rmdir
 date -u
