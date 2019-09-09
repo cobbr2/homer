@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if grep bashrc_ext ~/.bashrc ; then
+  : done
+else
+  cat bashrc_ext >>~/.bashrc
+fi
+
+idempotent_home_link() {
+    from_name=~/${1}
+    to_name=${2:-${1}}
+    recovery="/tmp/oopsie/$$"
+    if [ ! -d "${recovery}" ] ; then
+        mkdir -p "${recovery}"
+    fi
+    if [ ! -L ${from_name} ] ; then
+        if [ -e ${from_name} ] ; then
+            echo "Recovery files exist in ${recovery}" 1>&2
+            mv "${from_name}" "${recovery}/${from_name}"
+        fi
+        ln -s ${PWD}/${to_name} ${from_name}
+    fi
+}
+
+(
+    cd ../rick
+    idempotent_home_link .bash
+    idempotent_home_link .vimrc
+    idempotent_home_link .vim vim
+    idempotent_home_link .gitconfig
+)

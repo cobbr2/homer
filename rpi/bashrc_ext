@@ -1,0 +1,4 @@
+# bashrc_ext
+for src in ~/.bash/*.sh ; do
+  source ${src}
+done

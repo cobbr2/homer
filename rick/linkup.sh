@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+#
+# RUN from the github `rick` directory!
 
-LINKTOHERE=./src/cc/cc/user/rick
+#LINKTOHERE=./src/cc/cc/user/rick
+LINKTOHERE=${PWD}
 for i in .?* ; do
     [ $i == '..' ] && continue
     [ $i == .ssh ] && continue
