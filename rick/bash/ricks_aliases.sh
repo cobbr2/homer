@@ -25,6 +25,8 @@ alias e='vi '
 alias twinkle='cd ~/twinkleshine'
 alias shine='cd ~/twinkleshine'
 
+alias be='bundle exec'
+
 # Clean up when Zeus dies
 function zzz {
   stty sane
