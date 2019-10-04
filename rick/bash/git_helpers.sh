@@ -4,7 +4,6 @@ alias gs="git status "
 alias gc="git checkout "
 alias gb="git branch "
 alias gd="git diff --no-index"
-alias gr="git checkout -- " # revert a single file
 alias ga="git add "
 alias gt="git commit "
 alias gl="git log "
