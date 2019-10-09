@@ -18,6 +18,7 @@ branch_cleanup () {
   if [ -n "$1" ] ; then
     branch_excludes="grep -v ${1}"
   fi
+  pushd $(git_root)
   git remote update --prune
   if git checkout master ; then
     git merge origin/master
@@ -27,6 +28,7 @@ branch_cleanup () {
   else
     echo $(color red Get your branch clean first!)
   fi
+  popd
 }
 
 pwb () {
