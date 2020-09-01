@@ -12,7 +12,7 @@ set wildmenu
 set modelines=4
 " Show tabs as odd character, same with trailing spaces or tabs.
 set list lcs=tab:·⁖,trail:¶
-:syntax enable
+" :syntax enable
 :retab
 
 " from http://items.sjbach.com/319/configuring-vim-right
@@ -26,13 +26,13 @@ runtime macros/matchit.vim
 
 " From git.../user/jason/vim/.vimrc:
 
-autocmd BufReadPost *
-      \ if ! exists("g:leave_my_cursor_position_alone") |
-      \     if line("'\"") > 0 && line ("'\"") <= line("$") |
-      \         exe "normal g'\"" |
-      \     endif |
-      \ endif
-
+"autocmd BufReadPost *
+"      \ if ! exists("g:leave_my_cursor_position_alone") |
+"      \     if line("'\"") > 0 && line ("'\"") <= line("$") |
+"      \         exe "normal g'\"" |
+"      \     endif |
+"      \ endif
+"
 "set background=dark
 
 " Copy visual selection to osx clipboard
@@ -53,8 +53,8 @@ map <leader>j :FufJumpList<CR>
 map <leader>f :FufFile<CR>
 map g:fuf_keyOpenTabpage <CR>
 
-map <leader>t :TlistToggle<CR>
-let Tlist_GainFocus_On_ToggleOpen = 1
+"map <leader>t :TlistToggle<CR>
+"let Tlist_GainFocus_On_ToggleOpen = 1
 
 " tab nav
 map <S-h> :tabp<CR>
