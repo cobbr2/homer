@@ -90,7 +90,7 @@ class Mover
 end
 
 if File.basename(__FILE__) == File.basename($0)
-  dry_run = false 
+  dry_run = false
   dir_cache = DirCache.new(dry_run: dry_run)
   input = STDIN
   good = bad = 0

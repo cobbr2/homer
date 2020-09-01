@@ -8,5 +8,5 @@
 # This prompted for stuff. The (shared) password is in the MacOS keystore under
 # (guard) passwords on cameras
 for i in 1 2 3 4 ; do
-    adduser camera${i}
+    adduser -s /usr/sbin/nologin camera${i}
 done

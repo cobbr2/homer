@@ -20,5 +20,5 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-*   *    *   *   *   find /mnt/cameras1/camera* -type f | sudo /home/pi/bin/move_files
+*   *    *   *   *   find /mnt/cameras/camera* -type f | sudo /home/pi/bin/move_files
 0   9    *   *   *   /home/pi/bin/rm_old_videos 60
