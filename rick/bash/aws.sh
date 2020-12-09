@@ -32,3 +32,14 @@ ec2-sh() {
   shift
   ssh $(ec2-ip "$destination") "${@}"
 }
+
+aws-region() {
+  if [ -z "${AWS_REGION}" ] ; then
+    export AWS_REGION=us-east-1
+  fi
+  echo "$AWS_REGION"
+}
+
+operations-aws-account-id() {
+  echo 311088406905
+}

@@ -31,6 +31,24 @@ branch_cleanup () {
   popd
 }
 
+# Extra subshell lets us use -e rather than &&\ chaining.
+# Use this b4 branch_cleanup; branch_cleanup will kill the state necessary for this to work.
+squashmerge_cleanup() {(
+  local branch_excludes=cat
+  if [ -n "$1" ] ; then
+    branch_excludes="grep -v ${1}"
+  fi
+  pushd $(git_root)
+  git remote update
+
+  set -e
+  git checkout master
+  git remote prune --dry-run origin |\
+    sed -n 's;^.*origin/;;gp' |\
+    ${branch_excludes} |\
+    xargs -L1 --no-run-if-empty git branch -D
+)}
+
 pwb () {
   git status | sed -n -e '/On branch/s;^.* ;;p'
 }
