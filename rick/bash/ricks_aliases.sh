@@ -9,6 +9,7 @@ export EC2_HOME=/home/rick/ec2-api-tools
 #export JAVA_HOME=/usr
 #export JAVA_OPTS "-Dsolr.solr.home=/home/rick/fun/Funambol/tools/tomcat/solr"
 
+export DISABLE_SPRING=1
 
 
 #bindkey ^Z run-fg-editor
@@ -57,7 +58,7 @@ ltags() {
   if [ -r .ctagsignore ] ; then
     also_exclude="--exclude=@.ctagsignore"
   fi
-  ctags -R $also_exclude --exclude=node_modules --exclude=tmp .
+  ctags -f TAGS -R $also_exclude --exclude=node_modules --exclude=tmp .
   popd >/dev/null
 }
 

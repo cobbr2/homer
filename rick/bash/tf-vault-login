@@ -1,0 +1,12 @@
+function tf-vault-login() {
+  GR_USERNAME=rick.cobb vault-login $AWS_ENVIRONMENT
+
+  read -p "Cut and paste the token from above" token
+
+  export VAULT_TOKEN="${token}"
+  export VAULT_SKIP_VERIFY=1
+  export VAULT_ADDR=https://localhost:1234
+
+  echo "Workspace select probably fails; need to map from ${AWS_ENVIRONMENT} to TNG in the tf-vault-login function"
+  terraform workspace select "${AWS_ENVIRONMENT}"
+}
