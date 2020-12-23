@@ -43,3 +43,9 @@ aws-region() {
 operations-aws-account-id() {
   echo 311088406905
 }
+
+aws-iam-in-group() {
+  group=${1:-"grnds-catalog-enduser-production-red"}
+  aws iam   get-account-authorization-details --filter User |\
+        jq '.["UserDetailList"] | map(select(.GroupList | contains(["'"${group}"'"])) | .UserName )'
+}
