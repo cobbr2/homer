@@ -1,7 +1,7 @@
 export INITIALS=rec
 export GR_GPGKEY_ADDRESS=rick@grnds.com
 
-export GR_HOME=~
+export GR_HOME=~/gr_home
 
 # More correct might be:
 export GR_USERNAME=rick.cobb

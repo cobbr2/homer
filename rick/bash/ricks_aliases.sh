@@ -15,24 +15,19 @@ export DISABLE_SPRING=1
 #bindkey ^Z run-fg-editor
 
 alias tidy='find * .* -prune \( -name "*~" -o -name ".*~" -o -name "%*" -o -name "*%" -o -name ".*%" -o -name "#*#"  -o -name "core" \) -exec rm {} \; -print'
-alias ls='ls --color'
+
+if [ $RICK_OS == "Darwin" ] ; then
+  alias ls='ls -G'
+else
+  alias ls='ls --color'
+fi
 alias lll='ls -ltra|tail'
 alias ll='ls -ltr'
-alias syslogs='tail -f /var/log/syslog'
 
 alias ta='vi -t'
 alias e='vi '
 
-alias twinkle='cd ~/twinkleshine'
-alias shine='cd ~/twinkleshine'
-
 alias be='bundle exec'
-
-# Clean up when Zeus dies
-function zzz {
-  stty sane
-  rm .zeus.sock
-}
 
 # Get to the top level of the product I'm working on.
 cdr () {

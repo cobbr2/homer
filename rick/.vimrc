@@ -38,7 +38,7 @@ autocmd BufNewFile,BufRead *.md set filetype=markdown
 
 " Add pathogen so more plugins (especially the slim colorer) work:
 " https://github.com/tpope/vim-pathogen
-execute pathogen#infect()
+"execute pathogen#infect()
 
 " From Jason Snell's CC .vimrc:
 
