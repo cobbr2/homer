@@ -70,18 +70,18 @@ h () {
     history ${1:-20}
 }
 
+clone_grh_repo() {
+  pushd ${GR_HOME}
+  git clone git@github.com:ConsultingMD/${1:?Specify repo name as first argument to clone_grh_repo}
+  popd
+}
+
+# TODO: Get this to do bash-completion!
 work () {
-  dir=${1}
-  case $dir in
-  ${HOME}*)
-    ;;
-  twink* | *shine)
-    dir=~/twinkleshine
-    ;;
-  *)
-    dir=~/${dir}
-    ;;
-  esac
+  dir="${GR_HOME}/${1}"
+  if [ ! -d $dir ] ; then
+    clone_grh_repo ${1}
+  fi
   pushd $dir
 }
 

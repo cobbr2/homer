@@ -24,7 +24,7 @@ branch_cleanup () {
     git merge origin/master
     # At GR, don't push the deletion to remote, since
     # we delete branches on merge.
-    git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 --no-run-if-empty git branch -d
+    git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 -r git branch -d
   else
     echo $(color red Get your branch clean first!)
   fi
@@ -46,7 +46,7 @@ squashmerge_cleanup() {(
   git remote prune --dry-run origin |\
     sed -n 's;^.*origin/;;gp' |\
     ${branch_excludes} |\
-    xargs -L1 --no-run-if-empty git branch -D
+    xargs -L1 -r git branch -D
 )}
 
 pwb () {

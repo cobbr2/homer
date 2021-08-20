@@ -13,5 +13,5 @@ unset GR_ABBREV_USERNAME
 export KEY_SUFFIX=grandrounds.com
 export GIT_ORG=consultingmd
 
-# And I always had:
-export GR_HOST_IP=$(~/bin/lan_ip_address)
+# And I always had: (but need to grab ~/bin from lenovo box...) ReC LENOVO
+#export GR_HOST_IP=$(~/bin/lan_ip_address)

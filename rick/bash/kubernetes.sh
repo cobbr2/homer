@@ -2,10 +2,13 @@
 
 alias k=kubectl
 aws-environment () {
+  use_sso=1
   gr::aws_environment::main "$@";
   if [ $# -gt 0 ]; then
     export KUBECONFIG=~/.kube/config.$AWS_ENVIRONMENT
-    test -f $KUBECONFIG || aws eks update-kubeconfig --name "$AWS_ENVIRONMENT-eks-cluster" --kubeconfig $KUBECONFIG
+    if [ ! -f $KUBECONFIG ] ; then
+      aws eks update-kubeconfig --name "$AWS_ENVIRONMENT-eks-cluster" --kubeconfig $KUBECONFIG 2>/dev/null || echo "No Kubernetes cluster for ${AWS_ENVIRONMENT}"
+    fi
   fi
 }
 
