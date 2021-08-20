@@ -1,0 +1,11 @@
+[user]
+	name = Rick Cobb
+	email = rick.cobb@grandrounds.com
+[color]
+	ui = true
+[core]
+	excludesfile = /Users/rick.cobb/.gitignore_global
+[push]
+	default = simple
+[pull]
+	default = simple
