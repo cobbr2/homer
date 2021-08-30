@@ -80,6 +80,9 @@ clone_grh_repo() {
 work () {
   dir="${GR_HOME}/${1}"
   if [ ! -d $dir ] ; then
+    case "${1}" in
+    */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
+    esac
     clone_grh_repo ${1}
   fi
   pushd $dir

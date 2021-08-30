@@ -11,7 +11,7 @@ docker-build () {
   # Don't vary this too much: many tng Docker layers will build on every change
   ref="${GR_USERNAME}-laptop-local"
   if [ -z "${RAILS_ENV}" ] ; then
-    echo "Defaulting RAILS_ENV to `development`" 1>&2
+    echo "Defaulting RAILS_ENV to 'development'" 1>&2
     RAILS_ENV=development
   fi
   docker build \
