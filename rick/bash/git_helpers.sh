@@ -12,6 +12,27 @@ alias glfd="git log --stat --follow --patch-with-raw "
 alias gls="git log --no-merges --pretty=medium --stat"
 alias gp="git pull"
 
+# Not implementing the actual color stuff today; don't know how that worked
+# on Linux
+color() {
+  local color=${1}
+  shift
+  echo "${@}"
+}
+
+# Does this repo use "master", "main", or something else to identify the trunk
+# of the revision graph? Simple preference: main > master, else complain. Might
+# be better if it worked from `origin/`, but "origin" is yet another flexible
+# convention.
+main_branch()
+{
+  candidates=$(git branch -a 2>/dev/null | egrep '^..(main|master)$' | sort | sed -n '1s/^..//p')
+  if [ -z "${candidates}" ] ; then
+    echo "No main or master branch found" 1>&2
+  fi
+  echo "${candidates}"
+}
+
 branch_cleanup () {
   local branch_excludes
   branch_excludes=cat
@@ -20,8 +41,9 @@ branch_cleanup () {
   fi
   pushd $(git_root)
   git remote update --prune
-  if git checkout master ; then
-    git merge origin/master
+  master=$(main_branch)
+  if git checkout $master ; then
+    git merge origin/$master
     # At GR, don't push the deletion to remote, since
     # we delete branches on merge.
     git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 -r git branch -d
@@ -42,7 +64,7 @@ squashmerge_cleanup() {(
   git remote update
 
   set -e
-  git checkout master
+  git checkout $(main_branch)
   git remote prune --dry-run origin |\
     sed -n 's;^.*origin/;;gp' |\
     ${branch_excludes} |\

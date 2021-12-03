@@ -24,7 +24,11 @@ docker-build () {
 }
 
 tng-build () {
-  docker-build -f docker/Dockerfile .
+  docker-build --tag $(current_service) -f docker/Dockerfile .
+}
+
+dev-build () {
+  docker-build --tag $(current_service)-dev --target dev -f docker/Dockerfile .
 }
 
 og-build () {
@@ -105,6 +109,7 @@ deploy-latest() {
   echo "Total time (seconds): $(($end_time - $start_time))"
 }
 
+# For `tim` at the moment.
 docker-local () {
   port_map=${1:-"10004:10004"}
   tag=$(git rev-parse HEAD)
@@ -155,4 +160,12 @@ service_debug() {
 
 lgr() {
   ${GR_HOME}/platform-api/bin/grctl --server=http://localhost:8000 "$@"
+}
+
+docker-rm-zombies() {
+  old_exited_containers=$(docker ps -a | awk '/ago *Exited/ { print $1 }')
+  if [ -z "${old_exited_containers}" ] ; then
+    return 0
+  fi
+  docker rm $old_exited_containers
 }

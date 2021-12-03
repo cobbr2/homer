@@ -88,6 +88,26 @@ work () {
   pushd $dir
 }
 
+foss () {
+  export FOSS=~/foss
+  if [ $# -eq 0 ] ; then
+    pushd ${FOSS}
+  fi
+
+  dir="${FOSS}/${1}"
+  if [ ! -d $dir ] ; then
+    case "${1}" in
+    */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
+    esac
+    repo=${2:?"Give repo URL as second argument"}
+    if [ -n "${repo}" ] ; then
+      cd ${FOSS}
+      git clone "${2}" "${1}"
+    fi
+  fi
+  pushd $dir
+}
+
 crashed () {
   find ~ -name '*.sw[po]' | xargs rm
   rm ~/*/tmp/pids/*
@@ -96,7 +116,10 @@ crashed () {
 }
 
 clip () {
-  xclip -i -selection clipboard
+  case `uname -a` in
+  *Darwin*) pbcopy ;;
+  * ) xclip -i -selection clipboard ;;
+  esac
 }
 
 fn_exists () {
