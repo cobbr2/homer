@@ -100,7 +100,7 @@ deploy-latest() {
 
   echo "====================== DEPLOYING ${service} ${pushed} ===================================="
 
-  deployment=$(gr deploy run $service $pushed | tee /dev/tty | tail -1)
+  deployment=$(gr deploy run $service $pushed | tee /dev/tty | sed -n '/Deployment ID: /s/Deployment ID: //p')
 
   wait_for_deploy "${deployment}"
 
