@@ -70,9 +70,35 @@ h () {
     history ${1:-20}
 }
 
+find_repo() {
+  local org_path="${GITHUB_ORG_PATH:-'ConsultingMD:doctorondemand:GRH_IT'}"
+  repo="${1:?First argument to find_repo must be repo name}"
+  OIFS="${IFS}"
+  IFS=:
+  for org in $org_path ; do
+    IFS="${OIFS}"
+    repo_url=git@github.com:"${org}/${repo}".git
+    if git ls-remote "${repo_url}" >/dev/null 2>&1 ; then
+      echo "${repo_url}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Dead for now:
 clone_grh_repo() {
   pushd ${GR_HOME}
   git clone git@github.com:ConsultingMD/${1:?Specify repo name as first argument to clone_grh_repo}
+  popd
+}
+
+clone_ih_repo() {
+  pushd ${GR_HOME}
+  repo=$(find_repo "${1:?'Repo?'}")
+  if [ -n "${repo}" ] ; then
+    git clone "${repo}"
+  fi
   popd
 }
 
@@ -83,22 +109,24 @@ work () {
     case "${1}" in
     */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
     esac
-    clone_grh_repo ${1}
+    clone_ih_repo ${1}
   fi
   pushd $dir
+}
+
+grr () {
+  cd "${GR_HOME}"
 }
 
 foss () {
   export FOSS=~/foss
   if [ $# -eq 0 ] ; then
     pushd ${FOSS}
+    return 0
   fi
 
   dir="${FOSS}/${1}"
   if [ ! -d $dir ] ; then
-    case "${1}" in
-    */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
-    esac
     repo=${2:?"Give repo URL as second argument"}
     if [ -n "${repo}" ] ; then
       cd ${FOSS}

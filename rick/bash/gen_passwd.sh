@@ -7,6 +7,6 @@ function genpass {
     shift
   fi
   # alias genpass='< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8; echo'
-  tr -dc "$pattern" < /dev/urandom | head -c "${1:-16}"
+  LC_ALL=C tr -dc "$pattern" < /dev/urandom | head -c "${1:-16}"
   echo
 }

@@ -39,11 +39,24 @@ current_service() {
   basename $(git rev-parse --show-toplevel)
 }
 
+# Assumes that the name of one ECR repository for your code matches the name of
+# your Github repository. (Call that one the "namesake" ECR repo)
+#
+# Does not check that every image has been built for multi-image repos (e.g.,
+# jarvis, selenium), so there's still a chance an ensuing deploy will fail for
+# an unbuilt image. You may be able to work around that by judiciously ordering
+# things in your CI build so the namesake image is the last one to complete
+# upload.
 is_built_yet() {
   local repository="$1"
   local sha="$2"
-  aws ecr batch-get-image --registry-id 311088406905 --repository-name "${repository}"  --image-ids imageTag="${sha}" |\
-    jq -e '.failures as $failures | ($failures | length == 0)' 1>/dev/null
+  details=$(aws ecr describe-images --registry-id 311088406905 --repository-name "${repository}" --image-ids imageTag="${sha}")
+  local status=$?
+
+  if [ ${status} -ne 0 ] ; then
+    echo "${details}" 1>&2
+  fi
+  return "${status}"
 }
 
 wait_for_build() {
