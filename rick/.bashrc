@@ -52,10 +52,6 @@ for setup in ~/homer/rick/bash/*.sh ; do
   . $setup
 done
 
-if [ -n "$rvm_path" ] ; then
-  cd $PWD # Get the .rvm_* files read
-fi
-
 export NVM_DIR="${HOME}/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
@@ -71,8 +67,6 @@ PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5"; export PERL_MM_OPT;
 # tabtab source for sls package
 # uninstall by removing these lines or running `tabtab uninstall sls`
 [ -f ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash ] && . ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash
-
-#path_push "$HOME/.rvm/bin"
 
 . $HOME/.asdf/asdf.sh
 
