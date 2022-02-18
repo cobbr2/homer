@@ -39,36 +39,35 @@ current_service() {
   basename $(git rev-parse --show-toplevel)
 }
 
-# Assumes that the name of one ECR repository for your code matches the name of
-# your Github repository. (Call that one the "namesake" ECR repo)
+# Just determines if the build is done or not; retun
+# Echos a string with the current build status, returns 0 if done. String
+# must be interrogated for success or fail.
 #
-# Does not check that every image has been built for multi-image repos (e.g.,
-# jarvis, selenium), so there's still a chance an ensuing deploy will fail for
-# an unbuilt image. You may be able to work around that by judiciously ordering
-# things in your CI build so the namesake image is the last one to complete
-# upload.
-is_built_yet() {
-  local repository="$1"
-  local sha="$2"
-  details=$(aws ecr describe-images --registry-id 311088406905 --repository-name "${repository}" --image-ids imageTag="${sha}")
-  local status=$?
+# Useful in a loop like, oh, do this some other day, Rick
+#
+branch_head_build_status() {
+  details=$(gh pr checks)
+}
 
-  if [ ${status} -ne 0 ] ; then
-    echo "${details}" 1>&2
-  fi
-  return "${status}"
+# Now that this uses `gh pr checks`, it doesn't need (can't use) the sha to
+# check... so this really is private to to the `wait_for_build` /
+# `release_lateest` stuff which make sure that we're in the right repository
+# and the latest sha is pushed.
+#
+# Design decision to let these low-level routines print their own status is
+# beginning to smell bad.
+branch_head_is_built() {
+  gh pr checks
 }
 
 wait_for_build() {
-  local service="${1:-$(current_service)}"
-  local sha="${2:-$(git rev-parse HEAD)}"
+  local branch="${1:-$(pwb)}"
   local start_time=$(date +%s)
 
-
-  while ! is_built_yet "${service}" "${sha}" ; do
+  until branch_head_is_built "${branch}" ; do
     local current_time=$(date +%s)
     cat 1>&2 <<-STILL_WAITING
-	SHA ${sha} has not shown up in the ${service} ECR repository yet. $(($current_time - $start_time))s
+	Branch ${branch} head is not built yet. $(($current_time - $start_time))s
 	STILL_WAITING
     sleep 10
   done
@@ -81,7 +80,7 @@ deployment_status() {
 
 wait_for_deploy() {
   deployment="${1:?'deployment id'}"
-  while [ $(deployment_status "${deployment}") == 'Running' ] ; do
+  while [[ $(deployment_status "${deployment}") =~ Running|Pending ]] ; do
     sleep 10
   done
 }
@@ -94,22 +93,32 @@ log_deployment_and_wait() {
   gr deploy logs "${deployment}" --follow | sed '/END OF LOGS/q'
 }
 
-deploy-latest() {
-  service=${1:-$(current_service)}
-  pushed=$(git rev-parse origin/$(pwb))
+validate_pushed_sha() {
+  pushed="${1}"
   head=$(git rev-parse HEAD)
   if [ "$pushed" != "$head" ] ; then
     cat 1>&2 <<-USE_THE_REAL_COMMAND
 	Your latest known origin SHA is not your local HEAD. Use
 	  gr deploy run ${service} ${pushed}
-	to deploy it if that's what you want. Otherwise, push!
+	to deploy the latest origin commit if that's what you want. Otherwise, push!
 	USE_THE_REAL_COMMAND
+    return 1
+  fi
+  return 0
+}
+
+deploy-latest() {
+  service=${1:-$(current_service)}
+  branch=${2:-$(pwb)}
+
+  pushed=$(git rev-parse origin/${branch})
+  if ! validate_pushed_sha "${pushed}" ; then
     return 1
   fi
 
   start_time=`date +%s`
 
-  wait_for_build "${service}" "${pushed}"
+  wait_for_build "${branch}"
 
   echo "====================== DEPLOYING ${service} ${pushed} ===================================="
 
