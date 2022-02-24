@@ -71,7 +71,7 @@ h () {
 }
 
 find_repo() {
-  local org_path="${GITHUB_ORG_PATH:-'ConsultingMD:doctorondemand:GRH_IT'}"
+  local org_path="${GITHUB_ORG_PATH:-ConsultingMD:doctorondemand:GRH_IT}"
   repo="${1:?First argument to find_repo must be repo name}"
   OIFS="${IFS}"
   IFS=:

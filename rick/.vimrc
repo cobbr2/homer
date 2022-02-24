@@ -13,6 +13,10 @@ set wildmode=longest:full
 set wildmenu
 set modelines=4
 
+" See https://vi.stackexchange.com/questions/25086/vim-hangs-when-i-open-a-typescript-file
+" Cargo-culted
+set re=2
+
 " < Handle whitespace issues:
 " Show tabs as odd character, same with trailing spaces or tabs.
 set list lcs=tab:·⁖,trail:¶
