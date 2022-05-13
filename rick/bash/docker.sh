@@ -57,7 +57,7 @@ branch_head_build_status() {
 # Design decision to let these low-level routines print their own status is
 # beginning to smell bad.
 branch_head_is_built() {
-  gh pr checks
+  gh pr --watch checks
 }
 
 wait_for_build() {
@@ -67,7 +67,7 @@ wait_for_build() {
   until branch_head_is_built "${branch}" ; do
     local current_time=$(date +%s)
     cat 1>&2 <<-STILL_WAITING
-	Branch ${branch} head is not built yet. $(($current_time - $start_time))s
+	Branch ${branch} is BROKEN (you should finish fixing wait_for_build). $(($current_time - $start_time))s
 	STILL_WAITING
     sleep 10
   done

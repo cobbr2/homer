@@ -125,13 +125,25 @@ foss () {
     return 0
   fi
 
-  dir="${FOSS}/${1}"
-  if [ ! -d $dir ] ; then
-    repo=${2:?"Give repo URL as second argument"}
-    if [ -n "${repo}" ] ; then
-      cd ${FOSS}
-      git clone "${2}" "${1}"
+  case "x-${1:-y}" in
+  x-http*:* | x-git*:* )
+    dir="${FOSS}/$(basename '${1}')"
+    repo="${1}"
+    ;;
+  x-y | x---help | x-\?)
+    echo "Usage: foss [ name ] [ repository_url ]"
+    ;;
+  x-*)
+    dir="${FOSS}/${1}"
+    if [ ! -d $dir ] ; then
+      repo=${2:?"Not found locally. Give repo URL as second argument"}
     fi
+    ;;
+  esac
+
+  if [ ! -d "$dir" -a -n "${repo}" ] ; then
+    cd ${FOSS}
+    git clone "${repo}" "${dir}"
   fi
   pushd $dir
 }
