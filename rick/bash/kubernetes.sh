@@ -1,16 +1,10 @@
 # TODO: Reconcile all the k8s & docker aliases.
 
 alias k=kubectl
-aws-environment () {
-  use_sso=1
-  gr::aws_environment::main "$@";
-  if [ $# -gt 0 ]; then
-    export KUBECONFIG=~/.kube/config.$AWS_ENVIRONMENT
-    if [ ! -f $KUBECONFIG ] ; then
-      aws eks update-kubeconfig --name "$AWS_ENVIRONMENT-eks-cluster" --kubeconfig $KUBECONFIG 2>/dev/null || echo "No Kubernetes cluster for ${AWS_ENVIRONMENT}"
-    fi
-  fi
-}
+#aws-environment () {
+#  use_sso=1
+#  gr::aws_environment::main "$@" && kube-setup
+#}
 
 # Make idempotent!
 k_login_prep() {

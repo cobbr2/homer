@@ -166,3 +166,17 @@ fn_exists () {
   declare -f -F $1 > /dev/null
   return $?
 }
+
+west() {
+  env=${1:-uat}
+  aws-environment "${env}" platform --region us-west-2 && kube-setup
+}
+
+east() {
+  env=${1:-uat}
+  aws-environment "${env}" platform --region us-east-1 && kube-setup
+}
+
+dod() {
+  aws-environment "dod" --region us-east-1 && kube-setup
+}

@@ -36,6 +36,9 @@ prompt_function() {
     *production*)
       aws_color_on='tput setab 1' # Red
       ;;
+    *dod*)
+      aws_color_on='tput setab 172' # Orange
+      ;;
     *uat*)
       aws_color_on='tput setab 3' # Yellow/orange
       ;;
@@ -50,6 +53,18 @@ prompt_function() {
       ;;
   esac
 
+  case "${AWS_DEFAULT_REGION}" in
+    us-east-1)
+      region_arrow="→"
+      ;;
+    us-west-2)
+      region_arrow="←"
+      ;;
+    *)
+      region_arrow=":"
+      ;;
+  esac
+
   if test $(git status 2> /dev/null | grep -c :) -eq 0; then
     git_color="${GREEN}"
   else
@@ -59,7 +74,7 @@ prompt_function() {
   # I got lost too often that way, so moved the git stuff before the dir
   #PS1="${RESET}\u@\h:${git_color}$(__git_ps1)${RESET} \w\$ "
   local BRANCH=$(__git_ps1)
-  local STATUS="${RESET}\[$($aws_color_on)\]\u@\h:${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}\[$($aws_color_off)\]"
+  local STATUS="${RESET}\[$($aws_color_on)\]\u@\h${region_arrow}${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}\[$($aws_color_off)\]"
 
   #echo $(( ${#BRANCH} + ${#PWD} ))
   if [[ $(( ${#BRANCH} + ${#PWD} )) -lt 100 ]] ; then
