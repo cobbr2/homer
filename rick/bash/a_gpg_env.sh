@@ -14,7 +14,7 @@ function gpgenv  {
 
   echo "Decoding '${gpg_file_name}'" 1>&2
 
-  $(gpg -o - --use-agent --quiet ${gpg_file_name})
+  $(gpg -o - --use-agent --quiet ${gpg_file_name} | sed 's/#.*$//')
 }
 
 function gpg_agent_working {
