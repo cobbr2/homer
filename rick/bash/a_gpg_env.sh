@@ -2,7 +2,19 @@
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
 function gpgenv  {
-  $(gpg -o - --use-agent --quiet ${1:?gpg_file_name})
+  gpg_file_name=${1:?gpg_file_name}
+
+  if [ ! -f "${gpg_file_name}" ] ; then
+    gpg_file_name=~/gpgs/"${gpg_file_name}".gpg
+  fi
+
+  if [ ! -r "${gpg_file_name}" ] ; then
+    echo "Can't find ${gpg_file_name} or not readable" && return 1
+  fi
+
+  echo "Decoding '${gpg_file_name}'" 1>&2
+
+  $(gpg -o - --use-agent --quiet ${gpg_file_name})
 }
 
 function gpg_agent_working {
