@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # All of this is Quick & Dirty for testing with IAM Users rather than
 # federated ones.
@@ -14,8 +15,9 @@ function gandalf::role() {
   echo stone
 }
 
+session_tags=""
 function gandalf::session_tags() {
-  echo "--tags Key=access-service,Value=stone"
+  echo $session_tags
 }
 
 function gandalf::assume_role() {
@@ -34,7 +36,32 @@ function gandalf::assume_role() {
 }
 
 function gandalf() {
+  while [ $# -gt 0 ] ; do
+    case $1 in
+      "-s") session_tags="Key=access-service,Value=stone" ;;
+    esac
+    shift
+  done
+
   aws_logout
   gpgenv gandalf-access
   gandalf::assume_role
 }
+
+# Oh, I love this boilerplate just because it's *so* awful:
+# See https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced/14706745#14706745
+sourced=0
+if [ -n "$ZSH_EVAL_CONTEXT" ]; then
+  case $ZSH_EVAL_CONTEXT in *:file) sourced=1;; esac
+elif [ -n "$KSH_VERSION" ]; then
+  [ "$(cd $(dirname -- $0) && pwd -P)/$(basename -- $0)" != "$(cd $(dirname -- ${.sh.file}) && pwd -P)/$(basename -- ${.sh.file})" ] && sourced=1
+elif [ -n "$BASH_VERSION" ]; then
+  (return 0 2>/dev/null) && sourced=1
+else # All other shells: examine $0 for known shell binary filenames
+  # Detects `sh` and `dash`; add additional shell filenames as needed.
+  case ${0##*/} in sh|dash) sourced=1;; esac
+fi
+
+if [ $sourced == 0 ] ; then
+  gandalf ${@:+"${@}"}
+fi

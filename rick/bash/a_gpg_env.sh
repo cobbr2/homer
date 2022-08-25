@@ -12,8 +12,6 @@ function gpgenv  {
     echo "Can't find ${gpg_file_name} or not readable" && return 1
   fi
 
-  echo "Decoding '${gpg_file_name}'" 1>&2
-
   $(gpg -o - --use-agent --quiet ${gpg_file_name} | sed 's/#.*$//')
 }
 
