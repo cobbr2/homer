@@ -1,6 +1,5 @@
 set tabstop=8
 set shiftwidth=2
-" set background=dark
 set expandtab
 set autoindent
 set title
@@ -24,11 +23,20 @@ set list lcs=tab:·⁖,trail:¶
 autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown,yml,tf,sh,scala,sql autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >
 
+" Let make and go use tabs. F'n USG SoBs. But I still like sw=2 for the commands in Makefiles...
+autocmd FileType go,make set noexpandtab softtabstop=8 tabstop=8
+autocmd FileType go set shiftwidth=8
+
+" Unfortunately, .editorconfig will override this in some dirs:
+autocmd FileType make set shiftwidth=2
+
 " No Modula 2 for me!
 autocmd BufNewFile,BufRead *.md set filetype=markdown
 
-:syntax enable
-:retab
+syntax enable
+" Not sure how much good retab was doing me... don't really get what
+" it would do before a file was open...
+retab
 
 " FIXME: Get ruby % matching right.
 " from http://items.sjbach.com/319/configuring-vim-right
