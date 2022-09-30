@@ -29,6 +29,8 @@ alias e='vi '
 
 alias be='bundle exec'
 
+export I="${GR_HOME}"
+
 # Get to the top level of the product I'm working on.
 cdr () {
   newdir=$(expr "$PWD" : "\($GR_HOME/[^/]*\)")
@@ -36,7 +38,7 @@ cdr () {
 }
 
 devdirs () {
-  ls -d --format=single-column --color=never ~/*/.git | sed 's/\/.git//'
+  ls -d --format=single-column --color=never ${GR_HOME}/*/.git ~/foss/*/.git | sed 's/\/.git//'
 }
 
 grepall () {
@@ -86,13 +88,6 @@ find_repo() {
   return 1
 }
 
-# Dead for now:
-clone_grh_repo() {
-  pushd ${GR_HOME}
-  git clone git@github.com:ConsultingMD/${1:?Specify repo name as first argument to clone_grh_repo}
-  popd
-}
-
 clone_ih_repo() {
   pushd ${GR_HOME}
   repo=$(find_repo "${1:?'Repo?'}")
@@ -127,7 +122,7 @@ foss () {
 
   case "x-${1:-y}" in
   x-http*:* | x-git*:* )
-    dir="${FOSS}/$(basename '${1}')"
+    dir="${FOSS}/$(basename "${1}")"
     repo="${1}"
     ;;
   x-y | x---help | x-\?)
