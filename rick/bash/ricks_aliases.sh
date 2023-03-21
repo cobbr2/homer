@@ -97,7 +97,6 @@ clone_ih_repo() {
   popd
 }
 
-# TODO: Get this to do bash-completion!
 work () {
   case "${1}" in
   Downloads | Documents | Desktop | .bash )
@@ -118,6 +117,26 @@ work () {
   esac
   pushd $dir
 }
+
+# See https://unix.stackexchange.com/a/692303/566094
+_work_compgen_filenames() {
+    local cur="$1"
+    local WORK_DIR=$HOME/gr_home/
+
+    # Files, excluding directories:
+    grep -v -F -f <(compgen -d -P ^ -S '$' -- $WORK_DIR"$cur") \
+        <(compgen -f -P ^ -S '$' -- $WORK_DIR"$cur") |
+        sed -e 's|^\^'$WORK_DIR'||' -e 's/\$$/ /'
+
+    # Directories:
+    compgen -d -S / -- $WORK_DIR"$cur" | sed -e 's|'$WORK_DIR'||'
+}
+
+_work_complete() {
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=( $(_work_compgen_filenames "$cur") )
+}
+complete -o nospace -F _work_complete work
 
 grr () {
   cd "${GR_HOME}"
@@ -152,6 +171,26 @@ foss () {
   fi
   pushd $dir
 }
+
+# See https://unix.stackexchange.com/a/692303/566094
+_foss_compgen_filenames() {
+    local cur="$1"
+    local FOSS_DIR=$HOME/foss/
+
+    # Files, excluding directories:
+    grep -v -F -f <(compgen -d -P ^ -S '$' -- $FOSS_DIR"$cur") \
+        <(compgen -f -P ^ -S '$' -- $FOSS_DIR"$cur") |
+        sed -e 's|^\^'$FOSS_DIR'||' -e 's/\$$/ /'
+
+    # Directories:
+    compgen -d -S / -- $FOSS_DIR"$cur" | sed -e 's|'$FOSS_DIR'||'
+}
+
+_foss_complete() {
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=( $(_foss_compgen_filenames "$cur") )
+}
+complete -o nospace -F _foss_complete foss
 
 crashed () {
   find ~ -name '*.sw[po]' | xargs rm
