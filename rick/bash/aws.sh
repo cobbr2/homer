@@ -9,8 +9,6 @@ fi
 
 alias s3='aws s3'
 
-alias 'aws-refresh'='aws-environment "${AWS_ENVIRONMENT}"'
-
 ec2-ip() {
   field=3
   usage='ec2-ip [ --name | -n ] service'
