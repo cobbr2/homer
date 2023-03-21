@@ -42,11 +42,6 @@ function path_append {
   fi
 }
 
-path_push ${GR_HOME}/engineering/bin
-for setup in ${GR_HOME}/engineering/bash/*.sh ; do
-  . $setup
-done
-
 path_push ~/bin
 for setup in ~/homer/rick/bash/*.sh ; do
   . $setup
@@ -61,13 +56,10 @@ PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}
 PERL_MB_OPT="--install_base \"${HOME}/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5"; export PERL_MM_OPT;
 
-# tabtab source for serverless package
-# uninstall by removing these lines or running `tabtab uninstall serverless`
-[ -f ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.bash ] && . ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.bash
-# tabtab source for sls package
-# uninstall by removing these lines or running `tabtab uninstall sls`
-[ -f ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash ] && . ${HOME}/.nvm/versions/node/v8.5.0/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash
-
 . $HOME/.asdf/asdf.sh
 
 . $HOME/.asdf/completions/asdf.bash
+
+# This loads the Included Health shell augmentations into your interactive shell
+. "$HOME/.ih/augment.sh"
+
