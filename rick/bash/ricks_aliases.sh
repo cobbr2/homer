@@ -99,13 +99,23 @@ clone_ih_repo() {
 
 # TODO: Get this to do bash-completion!
 work () {
-  dir="${GR_HOME}/${1}"
-  if [ ! -d $dir ] ; then
-    case "${1}" in
-    */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
-    esac
-    clone_ih_repo ${1}
-  fi
+  case "${1}" in
+  Downloads | Documents | Desktop | .bash )
+    dir="~/${1}"
+    ;;
+  terraf[or][ro]m[-_]s*[-_]modules)
+    dir="${GR_HOME}/terraform-service-modules"
+    ;;
+  * )
+    dir="${GR_HOME}/${1}"
+    if [ ! -d $dir ] ; then
+      case "${1}" in
+      */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
+      esac
+      clone_ih_repo ${1}
+    fi
+    ;;
+  esac
   pushd $dir
 }
 
