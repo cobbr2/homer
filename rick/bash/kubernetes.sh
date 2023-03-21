@@ -1,6 +1,7 @@
 # TODO: Reconcile all the k8s & docker aliases.
 
 alias k=kubectl
+alias kp='kubectl -n platform'
 #aws-environment () {
 #  use_sso=1
 #  gr::aws_environment::main "$@" && kube-setup
