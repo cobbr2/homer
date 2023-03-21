@@ -17,10 +17,12 @@ set modelines=4
 set re=2
 
 " < Handle whitespace issues:
-" Show tabs as odd character, same with trailing spaces or tabs.
-set list lcs=tab:·⁖,trail:¶
+" Show tabs as odd character, same with trailing spaces or tabs. Showing eol shows
+" all eols, which I don't want; normal view of ^M is fine.
+"set list lcs=tab:·⁖,trail:¶
+set list lcs=tab:▹·,trail:␠
 " Remove trailing whitespace on save for files I care about
-autocmd FileType rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown,yml,tf,sh,scala,sql autocmd BufWritePre <buffer> :%s/\s\+$//e
+autocmd FileType go,make,rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown,yml,tf,sh,scala,sql autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >
 
 " Let make and go use tabs. F'n USG SoBs. But I still like sw=2 for the commands in Makefiles...
@@ -32,6 +34,8 @@ autocmd FileType make set shiftwidth=2
 
 " No Modula 2 for me!
 autocmd BufNewFile,BufRead *.md set filetype=markdown
+
+autocmd BufWritePost *.go !gofmt -w %
 
 syntax enable
 " Not sure how much good retab was doing me... don't really get what
@@ -105,3 +109,4 @@ map <leader>wq :wq<CR>
 
 cnoremap <Tab> <C-L><C-D>
 
+:set shell=/bin/bash
