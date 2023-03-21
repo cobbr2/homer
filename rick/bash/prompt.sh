@@ -70,19 +70,11 @@ prompt_function() {
   else
     git_color="${RED}"
   fi
-  #PS1="${RESET}\u@\h: \w${git_color}$(__git_ps1)${RESET}\$ "
-  # I got lost too often that way, so moved the git stuff before the dir
-  #PS1="${RESET}\u@\h:${git_color}$(__git_ps1)${RESET} \w\$ "
+
   local BRANCH=$(__git_ps1)
   local STATUS="${RESET}\[$($aws_color_on)\]\u@\h${region_arrow}${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}\[$($aws_color_off)\]"
 
-  #echo $(( ${#BRANCH} + ${#PWD} ))
-  if [[ $(( ${#BRANCH} + ${#PWD} )) -lt 100 ]] ; then
-    PS1="${STATUS}\$ "
-  else
-    PS1="
-${STATUS}
+  PS1="${STATUS}
 \$ "
-  fi
 }
 PROMPT_COMMAND=prompt_function
