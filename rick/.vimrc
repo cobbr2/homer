@@ -110,3 +110,19 @@ map <leader>wq :wq<CR>
 cnoremap <Tab> <C-L><C-D>
 
 :set shell=/bin/bash
+
+" Try to get Vundle working correctly, used instructions from https://www.twilio.com/blog/5-must-have-vim-plugins-that-will-change-your-workflow
+filetype off " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'ruanyl/vim-gh-line'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required

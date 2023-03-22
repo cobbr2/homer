@@ -26,3 +26,4 @@ TAGS
 _*
 .netrwhist
 rick/.vim/pack/**
+rick/.vim/bundle/vim-gh-line/**
