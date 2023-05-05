@@ -100,9 +100,9 @@ clone_ih_repo() {
 work () {
   case "${1}" in
   Downloads | Documents | Desktop | .bash )
-    dir="~/${1}"
+    dir=~/${1}
     ;;
-  terraf[or][ro]m[-_]s*[-_]modules)
+  terraf[or][ro]m[-_]s*[-_]modules | tsm)
     dir="${GR_HOME}/terraform-service-modules"
     ;;
   * )
