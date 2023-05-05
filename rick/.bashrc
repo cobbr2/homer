@@ -42,7 +42,18 @@ function path_append {
   fi
 }
 
+function timed_source {
+  #echo -n "$@: " && time . "$@"
+  . "$@"
+}
+
 path_push ~/bin
+
+# Set up for v2 bash-completions (MacOS only):
+# See https://discourse.brew.sh/t/bash-completion-2-vs-brews-auto-installed-bash-completions/2391/3?u=danemacmillan
+export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"
+timed_source "/usr/local/etc/profile.d/bash_completion.sh"
+
 for setup in ~/homer/rick/bash/*.sh ; do
   . $setup
 done
@@ -56,10 +67,9 @@ PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}
 PERL_MB_OPT="--install_base \"${HOME}/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5"; export PERL_MM_OPT;
 
-. $HOME/.asdf/asdf.sh
+timed_source $HOME/.asdf/asdf.sh
 
-. $HOME/.asdf/completions/asdf.bash
+timed_source $HOME/.asdf/completions/asdf.bash
 
 # This loads the Included Health shell augmentations into your interactive shell
-. "$HOME/.ih/augment.sh"
-
+timed_source "$HOME/.ih/augment.sh"
