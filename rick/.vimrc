@@ -111,18 +111,18 @@ cnoremap <Tab> <C-L><C-D>
 
 :set shell=/bin/bash
 
-" Try to get Vundle working correctly, used instructions from https://www.twilio.com/blog/5-must-have-vim-plugins-that-will-change-your-workflow
-filetype off " required
-
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
-
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'ruanyl/vim-gh-line'
-
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
+" KILLED TF HILITING -" Try to get Vundle working correctly, used instructions from https://www.twilio.com/blog/5-must-have-vim-plugins-that-will-change-your-workflow
+" KILLED TF HILITING -filetype off " required
+" KILLED TF HILITING -
+" KILLED TF HILITING -" set the runtime path to include Vundle and initialize
+" KILLED TF HILITING -set rtp+=~/.vim/bundle/Vundle.vim
+" KILLED TF HILITING -call vundle#begin()
+" KILLED TF HILITING -" alternatively, pass a path where Vundle should install plugins
+" KILLED TF HILITING -"call vundle#begin('~/some/path/here')
+" KILLED TF HILITING -
+" KILLED TF HILITING -" let Vundle manage Vundle, required
+" KILLED TF HILITING -Plugin 'VundleVim/Vundle.vim'
+" KILLED TF HILITING -Plugin 'ruanyl/vim-gh-line'
+" KILLED TF HILITING -
+" KILLED TF HILITING -" All of your Plugins must be added before the following line
+" KILLED TF HILITING -call vundle#end()            " required
