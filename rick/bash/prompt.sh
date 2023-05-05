@@ -15,7 +15,9 @@ prompt_function() {
   local       RESET='\[\033[0m\]'
   local TITLE_START='\[\033]0;'
   local   TITLE_END='\007\]'
-  # PROMPT_COMMAND='echo -ne "\033]0;SOME TITLE HERE\007"'
+
+  # Remember that \[ and \] must enclose all control code sequences; that's
+  # what allows bash to figure out what column it's in.
 
   # previous_return_value=$?;
   # case $previous_return_value in
@@ -30,28 +32,30 @@ prompt_function() {
   #   ;;
   # esac
   # use "${prompt_color}\$${RESET}" instead of "\$" below
-  aws_env=$(aws-environment)
-  aws_color_off='tput sgr 0'
+  local aws_env=$(aws-environment)
+  local aws_color_off="\[$(tput sgr 0)\]"
+  local aws_color
   case "${aws_env}" in
     *production*)
-      aws_color_on='tput setab 1' # Red
+      aws_color="$(tput setab 1)$(tput setaf 255)" # Red with bright white letters
       ;;
     *dod*)
-      aws_color_on='tput setab 172' # Orange
+      aws_color="$(tput setab 172)" # Orange
       ;;
     *uat*)
-      aws_color_on='tput setab 3' # Yellow/orange
+      aws_color="$(tput setab 3)" # Yellow/orange
       ;;
     *integration3*)
-      aws_color_on='tput setab 4' # Blue
+      aws_color="$(tput setab 4)$(tput setaf 255)" # Blue with bright white letters
       ;;
     *dev*)
-      aws_color_on='tput sgr 0' # Nada
+      aws_color="$(tput sgr 0)" # Nada
       ;;
     *)
-      aws_color_on='tput setab 7' # Grey
+      aws_color="$(tput setab 7)" # Grey
       ;;
   esac
+  aws_color_on="\[${aws_color}\]"
 
   case "${AWS_DEFAULT_REGION}" in
     us-east-1)
@@ -65,14 +69,15 @@ prompt_function() {
       ;;
   esac
 
+  local git_color
   if test $(git status 2> /dev/null | grep -c :) -eq 0; then
-    git_color="${GREEN}"
+    git_color="\[${GREEN}\]"
   else
-    git_color="${RED}"
+    git_color="\[${RED}\]"
   fi
 
   local BRANCH=$(__git_ps1)
-  local STATUS="${RESET}\[$($aws_color_on)\]\u@\h${region_arrow}${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}\[$($aws_color_off)\]"
+  local STATUS="${RESET}\[$aws_color_on\]\u@\h${region_arrow}\[${aws_color_off}\]${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}"
 
   PS1="${STATUS}
 \$ "
