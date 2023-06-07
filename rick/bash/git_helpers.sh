@@ -20,17 +20,14 @@ color() {
   echo "${@}"
 }
 
-# Does this repo use "master", "main", or something else to identify the trunk
-# of the revision graph? Simple preference: main > master, else complain. Might
-# be better if it worked from `origin/`, but "origin" is yet another flexible
-# convention.
+# I'm going to assume I've cloned and that the upstream I care about is origin;
+# that makes this pretty easy and gets rid of wacky hacks.  If we run into issues
+# where the main branch name has changed since origin was first cloned,
+#    git remote set-head origin -a
+# should fix, according to https://stackoverflow.com/a/62397081
 main_branch()
 {
-  candidates=$(git branch -a 2>/dev/null | egrep '^..(main|master)$' | sort | sed -n '1s/^..//p')
-  if [ -z "${candidates}" ] ; then
-    echo "No main or master branch found" 1>&2
-  fi
-  echo "${candidates}"
+  basename $(git rev-parse --abbrev-ref origin/HEAD)
 }
 
 branch_cleanup () {
@@ -41,9 +38,12 @@ branch_cleanup () {
   fi
   pushd $(git_root)
   git remote update --prune
-  master=$(main_branch)
-  if git checkout $master ; then
-    git merge origin/$master
+  local master=$(main_branch)
+  if [ -z "${master}" ] ; then
+    return 1
+  fi
+  if git checkout "$master" ; then
+    git merge "origin/$master"
     # At GR, don't push the deletion to remote, since
     # we delete branches on merge.
     git branch --merged | grep -v '^\*' | ${branch_excludes} | xargs -L 1 -r git branch -d

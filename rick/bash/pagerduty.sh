@@ -44,3 +44,8 @@ eval $(pd_labels_to_bash_assignments)
 instance_from_node() {
   eval $($GR_HOME/kore/bin/list-nodes | grep "/^$node/" | tee /dev/stderr | awk '/^'"${node}"'/ { print "instance=" $5 }')
 }
+
+pd_env() {
+  aws-environment --region $tng_region $tng_environment platform
+  kube-setup
+}
