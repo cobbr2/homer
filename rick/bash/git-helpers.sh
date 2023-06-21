@@ -27,7 +27,22 @@ color() {
 # should fix, according to https://stackoverflow.com/a/62397081
 main_branch()
 {
-  basename $(git rev-parse --abbrev-ref origin/HEAD)
+  fullpath=$(git rev-parse --abbrev-ref origin/HEAD)
+  if [ $? != 0 ] ; then
+    echo "New repo? Setting head alias from origin" 1>&2
+    git remote set-head origin -a
+    if [ $? != 0 ] ; then
+      echo "Set-head origin failed, main_branch giving up" 1>&2
+      return 2
+    fi
+    fullpath=$(git rev-parse --abbrev-ref origin/HEAD)
+    if [ $? != 0 ] ; then
+      echo "Hmm, main_branch giving up" 1>&2
+      return 1
+    fi
+  fi
+
+  basename "${fullpath}"
 }
 
 branch_cleanup () {
@@ -39,7 +54,7 @@ branch_cleanup () {
   pushd $(git_root)
   git remote update --prune
   local master=$(main_branch)
-  if [ -z "${master}" ] ; then
+  if [ $? != 0 -o -z "${master}" ] ; then
     return 1
   fi
   if git checkout "$master" ; then
@@ -78,4 +93,13 @@ pwb () {
 # Needs to be a bin to be used with `git root`. Someday
 git_root() {
   git rev-parse --show-toplevel
+}
+
+prme() {
+  local master=$(main_branch)
+  if [ $? != 0 -o -z "${master}" ] ; then
+    return 1
+  fi
+
+  ${GR_HOME}/engineering/bin/prme -t "$(main_branch)" ${@}
 }
