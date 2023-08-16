@@ -172,3 +172,134 @@ root                3346368             3346349             0                   
 Comppletely flumoxed. SMB config at /etc/samba/smb.conf looks as intended, no force...
 
 Restarting MAC on thought that somehow it's got state wrong... wacky, I know.
+
+# Lost notes on NFS
+
+# 5 Mar 2023
+
+At some point back in September I got NFS up in a docker-compose way.  OTOH, I failed
+to get to the point where I could tag music from my Mac.  Trying to get back to
+the point where I can mount & write at all from the Mac.
+
+To mount on Sounds, I used:
+
+	sudo mount -t nfs4 -w newsounds:/ /mnt
+
+Mounting on Mac:
+
+	sudo mount -o vers=4 -t nfs 192.168.222.6:/ testNewSounds
+
+Can create files, but they're empty. OTOH, can append to files. Weird. Presumed it
+was permissions, but even w/ umask 000 can't write to the files I create:
+
+```
+Ricks-MacBook-Air:_TestDir rick$ umask 000
+Ricks-MacBook-Air:_TestDir rick$ echo "something from Mac umask 000" >_umask_000_from_Mac
+Ricks-MacBook-Air:_TestDir rick$ cat _umask_000_from_Mac 
+Ricks-MacBook-Air:_TestDir rick$ ls -l _umask_000_from_Mac 
+-rw-rw-rw-  1 rick  staff  0 Mar  5 18:02 _umask_000_from_Mac
+```
+
+Append is flakey, but works if the file is new'ed on the server and empty:
+
+Full Scenario:
+
+On newsounds:
+```
+rec@newsounds:~/Music/_TestDir$ > _append_another
+rec@newsounds:~/Music/_TestDir$ chmod a+w _append_another
+```
+
+On macbook:
+```
+Ricks-MacBook-Air:_TestDir rick$ ls -l
+total 40
+-rw-rw-rw-  1 rick  staff   0 Sep 11 12:13 Bar
+-rw-rw-rw-  1 1000  1000    0 Mar  5 18:08 _append_another
+-rw-rw-rw-  1 1000  1000   20 Mar  5 17:58 _append_to_this
+-rw-rw-rw-  1 rick  staff   8 Mar  5 18:01 _send_something_from_mac
+-rw-rw-rw-  1 rick  staff   0 Mar  5 18:02 _umask_000_from_Mac
+-rw-rw-rw-  1 rick  staff  25 Sep 11 12:17 _wackamole
+-rw-r--r--  1 rick  staff   0 Mar  5 17:56 _written-from-rickMac-to-newSounds
+-rw-rw-r--  1 1003  1004   11 Mar  5 17:42 _written_from_sounds_to_newsounds
+-rw-rw-r--  1 1000  1000    8 Mar  5 17:40 _written_on_newsounds
+Ricks-MacBook-Air:_TestDir rick$ echo "writting something from Mac" >>_append_another
+Ricks-MacBook-Air:_TestDir rick$ ls -l _append_another
+-rw-rw-rw-  1 1000  1000  28 Mar  5 18:09 _append_another
+Ricks-MacBook-Air:_TestDir rick$ cat _append_another
+writting something from Mac
+Ricks-MacBook-Air:_TestDir rick$ echo "and  here's another line" >>_append_another
+Ricks-MacBook-Air:_TestDir rick$ cat _append_another
+writting something from Mac
+Ricks-MacBook-Air:_TestDir rick$ 
+```
+
+From Finder, was able to create a test directory *and* copy a file from Desktop to it.
+
+So let's see if I can retag a file, that's the goal anyway...
+
+Using TagEditor
+
+1. Had to reauthenticate with Apple ID
+2. Chmod'ed the Unknown/Unknown (first) directory to 777 / 666
+3. Opened in TagEditor
+4. Entered a bunch of stuff for the first cd of what appears to be the 2-CD Tom Jones Surrounded By Time (I only listened to a bit of the first song on album 580b4e07) 
+5. Hit Save.
+
+First song name changed (matched convention I put in, but it doesn't match my normal conventions; need to remove '_' separator).
+
+Five minutes later: first file's name is changed, but no others. Mac / TagEditor has been stuck in "Preparing for saving..." since I hit Save.
+
+NFS docker container logs -- nothing new since booted
+
+### Examining NFS
+
+```
+The SYNC environment variable is unset or null, defaulting to 'async' mode.
+Writes will not be immediately written to disk.
+```
+
+Wonder if that's the append issue? /etc/exports shows:
+
+> /nfsshare *(rw,fsid=0,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash)
+
+21.4% of CPU is going to nfsd
+
+# 3/11/23
+
+~10:30 AM
+* Was able to attach and play for a few minutes
+* Stopped
+
+Diagnosis:
+* Could not restart docker containers (permission denied in /var/lib/docker, all of which is owned by root)
+* Could not `docker ps` (same reason)
+* Rebooted the whole box
+
+Other events:
+* Power had been off to the machine earlier in the week (5 days earlier or so)
+* Had just reconnected ethernet before attaching
+
+After reboot (at least a minute)
+	* Pings OK
+	* ssh taking even longer than usual
+	* power light is on.
+	* did eventually (minutes?) finish ssh handshake
+	* no change in bahavior
+
+
+As root:
+* Still can't docker ps (permission denied on process 2746)
+
+Decided to reinstall docker, but didn't look to see how it was installed first.
+* Installed from docker web site (via apt repository)
+* `docker-compose` didn't start working, but `docker` and `docker compose` did.
+* Discovered the previous installation was via "snap"
+* Disabled and uninstalled snap version while waiting for VBR to download its layers and start
+* Eventually started, including flac mirror, and played KQED
+* Couldn't stop individual container (flac-mirror) via docker compose stop; stopped via docker stop <full name>
+* It's `flac_mirror`, misspelled.
+
+* Had a hard mount when restarting docker, locked up laptop. Hard mounts suck
+
+3/12/23
