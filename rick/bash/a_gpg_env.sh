@@ -1,6 +1,9 @@
 # Use gpg-agent as my ssh-agent
 export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
+# path_append is idempotent; gpg is in homebrew/bin
+path_append /opt/homebrew/bin
+
 function gpgenv  {
   gpg_file_name=${1:?gpg_file_name}
 

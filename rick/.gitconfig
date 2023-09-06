@@ -9,3 +9,7 @@
 	default = simple
 [pull]
 	default = simple
+[url "git@github.com:ConsultingMD/"]
+	insteadOf = https://github.com/ConsultingMD/
+[init]
+	templateDir = /Users/rick.cobb/.ih/git-template
