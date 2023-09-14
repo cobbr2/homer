@@ -1,1 +1,1 @@
-fn_exists load_keys && load_keys ~/.tracker/creds.gpg
+fn_exists load_keys && load_keys ~/gpgs/tracker-creds.gpg

@@ -1,7 +1,7 @@
 # Because Apple is a pain
 export BASH_SILENCE_DEPRECATION_WARNING=1
 
-export GR_HOME=~/gr_home
+export GR_HOME=~/ih_home
 
 function path_split {
   echo $PATH | tr ':' '\012'
@@ -51,8 +51,8 @@ path_push ~/bin
 
 # Set up for v2 bash-completions (MacOS only):
 # See https://discourse.brew.sh/t/bash-completion-2-vs-brews-auto-installed-bash-completions/2391/3?u=danemacmillan
-export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"
-timed_source "/usr/local/etc/profile.d/bash_completion.sh"
+#export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"
+#timed_source "/usr/local/etc/profile.d/bash_completion.sh"
 
 for setup in ~/homer/rick/bash/*.sh ; do
   . $setup
