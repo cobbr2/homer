@@ -150,7 +150,7 @@ push_branch() {
 # Utility functions for use by the command functions above.
 #
 repo() {
-  pwd | sed -n "s;${GR_HOME}/\([^/]*\).*$;\1;p"
+  basename $(git_root)
 }
 
 verify_on_branch() {

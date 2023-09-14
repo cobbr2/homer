@@ -39,25 +39,41 @@ current_service() {
   basename $(git rev-parse --show-toplevel)
 }
 
-# Just determines if the build is done or not; retun
-# Echos a string with the current build status, returns 0 if done. String
-# must be interrogated for success or fail.
-#
-# Useful in a loop like, oh, do this some other day, Rick
-#
-branch_head_build_status() {
-  details=$(gh pr checks)
+does_image_exist() {
+  if [[ $# -lt 2 ]]; then
+      echo "Usage: $( basename $0 ) <repository-name> <image-tag>"
+      return 1
+  fi
+
+  IMAGE_META="$( aws ecr describe-images --repository-name=$1 --image-ids=imageTag=$2 2> /dev/null )"
+
+  if [[ $? == 0 ]]; then
+      return 0
+  else
+      echo "$1:$2 not found"
+      return 1
+  fi
 }
 
 # Now that this uses `gh pr checks`, it doesn't need (can't use) the sha to
-# check... so this really is private to to the `wait_for_build` /
+# check... so this really is private to the `wait_for_build` /
 # `release_lateest` stuff which make sure that we're in the right repository
 # and the latest sha is pushed.
 #
 # Design decision to let these low-level routines print their own status is
 # beginning to smell bad.
+#
+# Bug: if there are required checks that haven't reported a status yet, gh pr
+# checks exits 0
 branch_head_is_built() {
-  gh pr --watch checks
+  local branch="${1:-$(pwb)}"
+  gh pr checks --watch "${branch}"
+}
+
+# Can't use gh pr since no pr; not implemented yet, should check
+# for image existence
+main_branch_is_built() {
+  aws ecr
 }
 
 wait_for_build() {

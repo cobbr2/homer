@@ -33,8 +33,7 @@ export I="${GR_HOME}"
 
 # Get to the top level of the product I'm working on.
 cdr () {
-  newdir=$(expr "$PWD" : "\($GR_HOME/[^/]*\)")
-  pushd $newdir
+  pushd $(git_root)
 }
 
 devdirs () {
