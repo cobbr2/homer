@@ -7,3 +7,17 @@
 [submodule "rick/.vim/bundle/Vundle.vim"]
 	path = rick/.vim/bundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim.git
+[submodule "rick/.vim/bundle/vim-endwise"]
+	path = rick/.vim/bundle/vim-endwise
+	url = https://github.com/tpope/vim-endwise.git
+[submodule "rick/.vim/bundle/vim-gitgutter"]
+	path = rick/.vim/bundle/vim-gitgutter
+	url = https://github.com/vim-scripts/vim-gitgutter.git
+[submodule "rick/.vim/bundle/vim-ruby"]
+	path = rick/.vim/bundle/vim-ruby
+	url = https://github.com/vim-ruby/vim-ruby.git
+[submodule "rick/.vim/bundle/vim-terraform"]
+	path = rick/.vim/bundle/vim-terraform
+	url = https://github.com/hashivim/vim-terraform.git
+
+

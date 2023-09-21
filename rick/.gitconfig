@@ -4,7 +4,9 @@
 [color]
 	ui = true
 [core]
-	excludesfile = /Users/rick.cobb/.gitignore_global
+	# Not unwinding this at the moment, though if we need a different
+	# .gitignore in homer, we could rename back to .gitignore_global
+	excludesfile = /Users/rick.cobb/.gitignore
 [push]
 	default = simple
 	autoSetupRemote = true

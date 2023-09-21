@@ -29,6 +29,8 @@ alias e='vi '
 
 alias be='bundle exec'
 
+alias more='less -R'
+
 export I="${GR_HOME}"
 
 # Get to the top level of the product I'm working on.
