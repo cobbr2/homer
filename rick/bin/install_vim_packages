@@ -4,6 +4,8 @@
 # all packages, just run again.  To remove packages, delete the appropriate
 # directories and remove from here. To add one, add to group below, and update
 # all.
+#
+# To sync, remove all of the packages, `rm -rf .vim/pack/*` and run the script.
 
 # Create new folder in ~/.vim/pack that contains a start folder and cd into it.
 #
@@ -16,6 +18,15 @@
 function set_group () {
   package_group=$1
   path="$HOME/.vim/pack/$package_group/start"
+  mkdir -p "$path"
+  cd "$path" || exit
+}
+
+function set_optional_group() {
+  # Anything in one of these groups needs to be pulled into VIM when you need
+  # it using `:packadd <package-name>`
+  package_group=$1
+  path="$HOME/.vim/pack/$package_group/opt"
   mkdir -p "$path"
   cd "$path" || exit
 }
@@ -44,11 +55,15 @@ function package () {
 
 (
 set_group ruby
-package https://github.com/tpope/vim-rails.git &
-package https://github.com/tpope/vim-rake.git &
-package https://github.com/tpope/vim-bundler.git &
 package https://github.com/tpope/vim-endwise.git &
 wait
+) &
+
+(
+set_optional_group rails
+package https://github.com/tpope/vim-rake.git &
+package https://github.com/tpope/vim-rails.git &
+package https://github.com/tpope/vim-bundler.git &
 ) &
 
 (
@@ -62,7 +77,8 @@ wait
 (
 set_group tng
 package https://github.com/hashivim/vim-terraform.git &
-package https://github.com/fatih/vim-go.git &
+package https://github.com/govim/govim.git &    # May not start gopls as necessary...
+# package https://github.com/fatih/vim-go.git & *WAY* too slow, added >5s to startup
 wait
 ) &
 
