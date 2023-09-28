@@ -1,9 +1,3 @@
-[submodule "rick/.vim/bundle/vim-slim"]
-	path = rick/.vim-confused/bundle/vim-slim
-	url = git@github.com:slim-template/vim-slim.git
-[submodule "rick/.vim/bundle/vim-go"]
-	path = rick/.vim-confused/bundle/vim-go
-	url = https://github.com/fatih/vim-go.git
 [submodule "rick/.vim/bundle/Vundle.vim"]
 	path = rick/.vim-confused/bundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim.git
@@ -13,9 +7,6 @@
 [submodule "rick/.vim/bundle/vim-gitgutter"]
 	path = rick/.vim-confused/bundle/vim-gitgutter
 	url = https://github.com/vim-scripts/vim-gitgutter.git
-[submodule "rick/.vim/bundle/vim-ruby"]
-	path = rick/.vim-confused/bundle/vim-ruby
-	url = https://github.com/vim-ruby/vim-ruby.git
 [submodule "rick/.vim/bundle/vim-terraform"]
 	path = rick/.vim-confused/bundle/vim-terraform
 	url = https://github.com/hashivim/vim-terraform.git
