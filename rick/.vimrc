@@ -35,7 +35,7 @@ autocmd FileType make set shiftwidth=2
 " No Modula 2 for me!
 autocmd BufNewFile,BufRead *.md set filetype=markdown
 
-autocmd BufWritePost *.go !gofmt -w %
+"autocmd BufWritePost *.go !gofmt -w %
 
 syntax enable
 " Not sure how much good retab was doing me... don't really get what
@@ -43,18 +43,6 @@ syntax enable
 retab
 
 " FIXME: Get ruby % matching right.
-" from http://items.sjbach.com/319/configuring-vim-right
-" Trying to get %-matching to work right for ruby. Also installed
-" ftplugin/ruby.vim from 
-" http://www.vim.org/scripts/script.php?script_id=303
-" still no-workie
-" I ended up adding matchit in as a plugin using :help matchit (it's
-" an example), and now have that plugin -- but still no ruby.
-" runtime macros/matchit.vim
-
-" Add pathogen so more plugins (especially the slim colorer) work:
-" https://github.com/tpope/vim-pathogen
-"execute pathogen#infect()
 
 " From Jason Snell's CC .vimrc:
 
@@ -68,10 +56,10 @@ autocmd BufReadPost *
 "set background=dark
 
 " Copy visual selection to osx clipboard
-"map <C-c> ygv:!pbcopy<CR>ugv
+map <C-c> ygv:!pbcopy<CR>ugv
 " Copy visual to X windows clipboard. Use -selection clipboard to 
 " go to the Gnome clipboard later when unifying keystrokes.
-map <C-c> ygv:!xclip -i<CR>ugv
+"map <C-c> ygv:!xclip -i<CR>ugv
 
 " kill ring
 map <leader>k :YRShow<CR>
@@ -83,25 +71,9 @@ map <C-K> <C-W>k<C-W>_
 " Autocompleting
 setlocal omnifunc=syntaxcomplete#Complete
 
-" FuzzyFinderText
-map <leader>j :FufJumpList<CR>
-map <leader>f :FufFile<CR>
-map g:fuf_keyOpenTabpage <CR>
-
-map <leader>t :TlistToggle<CR>
-let Tlist_GainFocus_On_ToggleOpen = 1
-
 " tab nav
 map <S-h> :tabp<CR>
 map <S-l> :tabn<CR>
-
-" Allow backspace to erase stuff (syntax error on my vim)
-"set backspace+=indent,eol,start 
-
-" Custom keys
-map <leader>q :q<CR>
-map <leader>w :w<CR>
-map <leader>wq :wq<CR>
 
 " Try for automatic indenting on XML files while working on APIs, etc.
 " OTOH: *does* change the file on writing, so be careful.
@@ -110,19 +82,3 @@ map <leader>wq :wq<CR>
 cnoremap <Tab> <C-L><C-D>
 
 :set shell=/bin/bash
-
-" KILLED TF HILITING -" Try to get Vundle working correctly, used instructions from https://www.twilio.com/blog/5-must-have-vim-plugins-that-will-change-your-workflow
-" KILLED TF HILITING -filetype off " required
-" KILLED TF HILITING -
-" KILLED TF HILITING -" set the runtime path to include Vundle and initialize
-" KILLED TF HILITING -set rtp+=~/.vim/bundle/Vundle.vim
-" KILLED TF HILITING -call vundle#begin()
-" KILLED TF HILITING -" alternatively, pass a path where Vundle should install plugins
-" KILLED TF HILITING -"call vundle#begin('~/some/path/here')
-" KILLED TF HILITING -
-" KILLED TF HILITING -" let Vundle manage Vundle, required
-" KILLED TF HILITING -Plugin 'VundleVim/Vundle.vim'
-" KILLED TF HILITING -Plugin 'ruanyl/vim-gh-line'
-" KILLED TF HILITING -
-" KILLED TF HILITING -" All of your Plugins must be added before the following line
-" KILLED TF HILITING -call vundle#end()            " required
