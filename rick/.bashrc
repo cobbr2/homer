@@ -37,9 +37,7 @@ ${non_rvm_paths}" | tr '\012' ':')
 }
 
 function path_append {
-  if ! path_has "${1}" ; then
-    PATH="${PATH}:${1}"
-  fi
+  path_has "${1}" || PATH="${PATH}:${1}"
 }
 
 function timed_source {
@@ -55,7 +53,9 @@ path_push ~/bin
 #timed_source "/usr/local/etc/profile.d/bash_completion.sh"
 
 for setup in ~/homer/rick/bash/*.sh ; do
+  #echo -n "$setup "
   . $setup
+  #echo "$setup done"
 done
 
 export NVM_DIR="${HOME}/.nvm"
