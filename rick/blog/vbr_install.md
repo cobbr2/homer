@@ -302,4 +302,155 @@ Decided to reinstall docker, but didn't look to see how it was installed first.
 
 * Had a hard mount when restarting docker, locked up laptop. Hard mounts suck
 
-3/12/23
+# 12/28/23
+
+* Note: several power off / on cycles since last worked with newsounds
+* Got BamBoom player to hook up
+
+Back to file systems:
+
+* Still trying NFS...
+* Used
+```
+        sudo mount -o vers=4 -t nfs 192.168.222.6:/ testNewSounds
+```
+From Mac:
+* Can create files
+* Can't put any data in them
+* Can't append anything via `>>`.
+    * Not even if the file was created empty & 0666 on NewSounds
+* Successfully copied a file from Mac to a directory created from the Mac.  Slow (lots of initialization time).
+* Opened a (zero-length) file created on the Mac in TextEdit, edited. Could not save.  Just "The document could not be autosaved"
+    * When quitting out, also got "The document "..." is on a volume that does not support permannet version storage"
+
+First hail-mary: update NFS image
+* Tried to just umount the volume from Finder, but even though I got mys hells out of the directory, Finder reports that Terminal still has filesystem open.
+* Also reported by umount. Killed Terminal
+* Looked for new image. `itsthenetwork/...` has not been updated in 5 years, so:
+    a. it must work for whoever uses it
+    b. let's try somebody else's.
+* Decided to try `erichough` which is clearly very closely related.  OTOH: 4 years old too.
+    a. both are based on `sjiveson/...`
+    b. a lot of this is redone in OpenEBS, but I didn't want to go all K8s today.
+* Got an install, turned on rw, insecure, etc... (see ~rick/nfs), finally got it to mount...
+    a. hung on `echo > _newFile`
+    b. created the ifle, but wrote nothing.
+    c. even though debug logging is enabled, nfs server logged nothing.
+
+# 12/29/23: Not VBR today: Bamboom
+
+Goal: Get Rotary encoder to do something useful
+
+* Configured to use newsounds (192.168.222.6:9000) and enable telnet ("y")
+* No sign that the rotary encoder is doing anything
+* LMS does not see the device?  It logs, but doesn't show in browser?!
+* LMS page render is very slow
+* Bamboom logs a problem with socket close every five/ten seconds
+
+Shut down useless NFS server
+
+* still can't see the player, though server logs some discovery:
+```
+[23-12-28 04:21:19.8789] Plugins::SqueezeESP32::Player::init (108) SqueezeESP player connected: 8c:ce:4e:b6:b9:fc
+[23-12-28 04:21:19.9049] Plugins::SqueezeESP32::Player::playerSettingsFrame (183) Setting player 128x32 for BamBoom
+[23-12-28 04:21:56.3866] Plugins::SqueezeESP32::Player::playerSettingsFrame (183) Setting player 128x32 for BamBoom
+[23-12-28 04:33:13.0529] Plugins::SqueezeESP32::Player::init (108) SqueezeESP player connected: 8c:ce:4e:b6:b9:fc
+[23-12-28 04:33:13.8179] Plugins::SqueezeESP32::Player::playerSettingsFrame (183) Setting player 128x32 for BamBoom
+[23-12-29 00:52:01.4932] main::init (377) Starting Logitech Media Server (v8.3.1, 1676361197, Fri 17 Feb 2023 06:37:09 AM CET) perl 5.028001 - x86_64-linux-gnu-thread-multi
+```
+
+* Restarted LMS using `docker restart <container>`
+* see restart logged, nothing else...
+* enabled a ton of debug flags on LMS. Applied, did not see restart requirement popup...
+* saw some Jive 'GotGLFRequest" stuff logged, but w/mac 12:34:56:78:12:34 (harumph)
+* restarted LMS... and bamboom... no change, nothing logged @LMS.  Conclusion: even though I can connect from sounds via curl on both 9090 & 9000, getting conn problem from bamboom...
+* check connectivity from another player by swapping music source for workshop
+    * no sound from workshop
+    * nothing logged @ LMS
+    * did show the workshop player @ LMS
+    * very slow response time, though i finally got volume turned down after a few minutes via phone
+* gave up on the server for a minute, thought I'd try to just see the buttons on the telnet session
+* turned off player, performance of LMS became acceptable. Nothing extra logged @ LMS,though.
+* turned on player, watched telnet (have to remember to reconnect!)
+* Got Rotary Button 1 pressed when rotated left
+* Checked LMS performance: swapping to KQED took a long time... checked KCSM & back, definitely slow.  Adding this player, mo matter that nothing is logged, slows the server way down
+* Also: *no display* now that rotary is defined?!
+    * after power cycle, display is up.  Hooked up vDC measurement, which is showing total oddity... took a long time to grow to -13.7?
+* Probed all the J6 outputs.  AFAICT, I had them mapped backwards.
+    * After rewiring, telnet now shows "Button Press" events like:
+```
+I (142637) buttons: Rotary push-button 1
+I (233547) buttons: Rotary push-button 0
+I (233897) buttons: Rotary push-button 1
+```
+    * OTOH: both left right, and knobpush all seem to generate the same strings.
+* Played around with getting LMS logging on newsounds to tell me something new about what's going on, didn't get anything.
+    * Discovered that once  aminute there's a "Jive" probe on the Discovery logging, whether anything's connected to that server or not.
+    * Each of those samples look like:
+```
+[23-12-30 04:49:21.3464] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:21.3502] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:21.9994] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:39.0570] Slim::Networking::Discovery::__ANON__ (125) Jive: 12:34:56:78:12:34
+[23-12-30 04:49:39.0597] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:39.0673] Slim::Networking::Discovery::__ANON__ (125) Jive: 12:34:56:78:12:34
+[23-12-30 04:49:39.0707] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:48.0057] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:48.0092] Slim::Networking::Discovery::gotTLVRequest (217) sending response
+[23-12-30 04:49:48.0131] Slim::Networking::Discovery::Server::gotTLVResponse (197) discovery response packet:
+[23-12-30 04:49:48.0165] Slim::Networking::Discovery::Server::gotTLVResponse (197) discovery response packet:
+```
+* Removed server string from Bamboom & restarted; got a fine registration with Sounds
+    * Rotary actions (in addition to above) get:
+```
+[00:04:19.889] cli_send_cmd:209 cannot send CLI 8c:ce:4e:b6:b9:fc button knob_push
+```
+    * Plays fine.
+    * `telnet sounds 9090` gets a "Connection closed by foreign host", so I suspect sounds isn't set up for cli (good thing to turn off if not using, but the button intepreter on SqueezeESP32 wants to use it)
+
+# 12/30/23
+
+Not my brightest day, I guess... after reading a bunch of stuff, I
+found the lmscommunity Docker image for LMS.  That didn't like the
+files built by the other container (because I had things mounted
+*in the container* in `/mnt/...`), so I ended up building a whole
+new server. Of course, that means changing all the flags & plugins
+again.
+
+One win is that the new directory map used in the container doesn't
+have the `/mnt` thing, so it's about as clean as it can get given that
+LMS uses fullpaths everywhere.
+
+# 12/31/23
+
+Second win: the new server display data on bamboom!
+
+Bamboom rotary debug is confusing.
+1. No matter what I do with the switch, I get random Rotary push-button results.
+2. I don't seem to get knob_button events
+3. I can remove the GPIO 18 & 19 wires entirely and get the same results
+4. Adding + power makes no change
+5. GPIO 18/19 don't work at all (unless SW GPIO5 is connected, but once it is, they don't matter)
+6. Kind of finding it hard to believe that I'm getting cross-talk to GPIOs that aren't connected.
+7. Figure I either don't have the right rotary encoders, or I'm completely misunderstanding, so will ask questions
+
+Moving on to trying a button (on 4 first, then 21, using config from README but replacing 5 w/ 21):
+
+Goal:
+```
+buttons: [{"gpio":4,"type":"BUTTON_LOW","pull":true,"long_press":1000,"normal":{"pressed":"ACTRLS_VOLDOWN"},"longpress":{"pressed":"buttons_remap"}},
+ {"gpio":5,"type":"BUTTON_LOW","pull":true,"shifter_gpio":4,"normal":{"pressed":"ACTRLS_VOLUP"}, "shifted":{"pressed":"ACTRLS_TOGGLE"}}]
+
+buttons_remap: [{"gpio":4,"type":"BUTTON_LOW","pull":true,"long_press":1000,"normal":{"pressed":"BCTRLS_DOWN"},"longpress":{"pressed":"buttons"}},
+ {"gpio":5,"type":"BUTTON_LOW","pull":true,"shifter_gpio":4,"normal":{"pressed":"BCTRLS_UP"}}]
+```
+
+Start: just a voldown button:
+buttons: [{"gpio":4,"type":"BUTTON_LOW","pull":true}]
+actrls_config: "buttons"
+
+Concern: I think my switch is momentary contact, so long-press won't make sense at the least....
+
+Configured, wired switch to ground & what should be 4, and got... nuthin'.
+
+Enough for a day with football & fireworks.
