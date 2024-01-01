@@ -1,0 +1,23 @@
+Not hooking up to LMS, and LMS is stalling when it tries.  What i see @ LMS is:
+
+```
+[23-08-26 17:11:06.0902] Slim::Web::JSONRPC::requestMethod (443) request not dispatchable!
+[23-08-26 17:11:06.1134] Slim::Web::JSONRPC::requestMethod (443) request not dispatchable!
+[23-08-26 17:11:06.1351] Slim::Web::JSONRPC::requestMethod (443) request not dispatchable!
+[23-08-26 17:11:06.1737] Slim::Web::JSONRPC::requestMethod (443) request not dispatchable!
+[23-08-26 17:11:18.4113] Slim::Plugin::CLI::Plugin::cli_socket_accept (239) Warning: Closing connection: too many connections open! (30)
+[23-08-26 17:11:28.6759] Slim::Plugin::CLI::Plugin::cli_socket_accept (239) Warning: Closing connection: too many connections open! (30)
+[23-08-26 17:11:38.9648] Slim::Plugin::CLI::Plugin::cli_socket_accept (239) Warning: Closing connection: too many connections open! (30)
+```
+
+Unplug device, sync comes together pretty well:
+
+```
+[23-08-26 17:11:39.1979] Slim::Player::StreamingController::_Resume (1660) b8:27:eb:7c:0e:56: startAt=1693095106.98089
+[23-08-26 17:11:39.1998] Slim::Player::StreamingController::_Resume (1660) 00:04:20:17:8f:f1: startAt=1693095106.95989
+[23-08-26 17:11:39.2020] Slim::Player::StreamingController::_Resume (1660) b8:27:eb:2c:c1:7a: startAt=1693095106.96989
+[23-08-26 17:11:48.0048] Slim::Player::StreamingController::_CheckSync (559) b8:27:eb:7c:0e:56 resync: skipAhead 19ms
+[23-08-26 17:12:48.0045] Slim::Player::StreamingController::_CheckSync (559) b8:27:eb:2c:c1:7a resync: skipAhead 10ms
+```
+
+Decided to keep that tail going & turn on all players to see how well sync really works for party.
