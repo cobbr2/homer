@@ -454,3 +454,5 @@ Concern: I think my switch is momentary contact, so long-press won't make sense 
 Configured, wired switch to ground & what should be 4, and got... nuthin'.
 
 Enough for a day with football & fireworks.
+
+Oh: and while it thinks it's bamboom, newsounds thinks it's SqueezeESP32
