@@ -456,3 +456,40 @@ Configured, wired switch to ground & what should be 4, and got... nuthin'.
 Enough for a day with football & fireworks.
 
 Oh: and while it thinks it's bamboom, newsounds thinks it's SqueezeESP32
+
+# 2024/01/06
+
+## Rotary control hardware setup solved!
+
+After reading Philippe's reply to my plaintive wtf? on the forum, I added some
+Dupont connectors to the ends of the black octopus cable, then plugged the whole
+set in at once so the mapping couldn't be confused. I also directly wired to the 
+part of the breadboard the rotary was on, instead of bridging.  That immediately
+worked, though the DT / CLK assignment was backwards so the knob worked backwards.
+
+## Changed name from SqueezeESP32 on newsounds
+
+Don't know if it took. Never have had to do that with other players, so I
+think there's still something odd about the upgraded server. Player automatically
+connects to `sounds` on startup (haven't tied it back to newsounds since that
+didn't work last week).
+
+## On to buttons
+
+I also learned how those arduino momentary contact switches work: they are SPDT, but
+the short-distance (not the bridgeable distance) is the switching direction.
+
+ACTRLS_TOGGLE is the pause/play button; don't use ACTRLS_PAUSE. Still have
+to decide what buttons we really want.
+
+Haven't decided which of the rotary configurations I like yet.  I've
+set up for "volume,longpress" at the moment, but it didn't look
+like LEFT worked the way I expected it to (it probably did *work*,
+it's just not intuitive, will keep rereading). I wonder; I think
+my intuition comes from the Transporter, and that had a separate
+BACK button (which might have been left), so perhaps I want the longpress
+mode to be UP, RIGHT, SELECT, which might not be a choice I have.
+
+Definitely don't understand what the ACTRL / BCTRL distinction is.
+
+Added config file to github.

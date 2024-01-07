@@ -2,15 +2,26 @@ SqueezeAmp.16.1335.master-v4.3
 is the version I'll be FTDING.
 
 
-TXD and RXD correspond with pins TX and RX in the picture of the FTDI board in the forum post that I referred to. Do not connect VCC. The Squeezeamp board has its own 3.3V voltage regulator that powers the ESP32 processor. On the FTDI serial adapter, set the jumper position to 3.3V to get 3.3V signaling on the serial interface.
+TXD and RXD correspond with pins TX and RX in the picture of the
+FTDI board in the forum post that I referred to. Do not connect
+VCC. The Squeezeamp board has its own 3.3V voltage regulator that
+powers the ESP32 processor. On the FTDI serial adapter, set the
+jumper position to 3.3V to get 3.3V signaling on the serial interface.
 
-As far as I know Espressif does not provide software for macOS, but I suppose that you can use the Squeezelite-ESP32 webinstaller provided by sle118. I have never used the web installer, so if you have questions about this installer I refer to sle118.
+As far as I know Espressif does not provide software for macOS, but
+I suppose that you can use the Squeezelite-ESP32 webinstaller
+provided by sle118. I have never used the web installer, so if you
+have questions about this installer I refer to sle118.
 
-EDIT: You do need to install a "virtual com port" driver on your mac. You can download a driver for various operating systems including macOS from VCP Drivers - FTDI.
-Last edited by CJS; 2023-07-31, 02:49.
-Grumpy BobGrumpy Bob replied2023-07-31, 01:52
-Originally posted by CJS View Post
-FYI, this forum post shows the required connections between serial adapter and squeezeAMP board, as well as the addresses of the firmware partitions.
-Mmm...well the FDTI adapter I have has 6 pinouts labelled VCC GND TXD RXD RTS AND CTS, so I'm unsure of the pin connections. Also what software would be recommended for macOS 13.5?
+EDIT: You do need to install a "virtual com port" driver on your
+mac. You can download a driver for various operating systems including
+macOS from VCP Drivers - FTDI.  Last edited by CJS; 2023-07-31,
+02:49.  Grumpy BobGrumpy Bob replied2023-07-31, 01:52 Originally
+posted by CJS View Post FYI, this forum post shows the required
+connections between serial adapter and squeezeAMP board, as well
+as the addresses of the firmware partitions.  Mmm...well the FDTI
+adapter I have has 6 pinouts labelled VCC GND TXD RXD RTS AND CTS,
+so I'm unsure of the pin connections. Also what software would be
+recommended for macOS 13.5?
 
 Robert
