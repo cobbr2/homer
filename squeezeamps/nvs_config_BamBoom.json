@@ -48,7 +48,7 @@
   "pollmx": "600",
   "rel_api": "https://api.github.com/repos/sle118/squeezelite-esp32/releases",
   "release_url": "CONFIG_SQUEEZELITE_ESP32_RELEASE_URL",
-  "rotary_config": "A=18,B=19,SW=5,longpress,volume",
+  "rotary_config": "A=18,B=19,SW=5,knobonly",
   "set_GPIO": "0=ir",
   "sleep_config": "",
   "spdif_config": "",
