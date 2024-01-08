@@ -19,7 +19,7 @@
   "bt_name": "BamBoom",
   "bt_sink_pin": "1234",
   "bt_sink_volume": "127",
-  "buttons": "[{\"gpio\":4,\"type\":\"BUTTON_LOW\",\"pull\":true,\"normal\":{\"pressed\":\"ACTRLS_PAUSE\",\"released\":\"ACTRLS_NONE\"}}]",
+  "buttons": "[{\"gpio\":4,\"type\":\"BUTTON_LOW\",\"pull\":true,\"normal\":{\"pressed\":\"ACTRLS_REW\",\"released\":\"ACTRLS_NONE\"},\"longpress\":{\"pressed\",\"ACTRLS_POWER\",\"\"released\":\"ACTRLS_NONE\"}},{\"gpio\":21,\"type\":\"BUTTON_LOW\",\"pull\":true,\"normal\":{\"pressed\":\"ACTRLS_FWD\",\"released\":\"ACTRLS_NONE\"}\"longpress\":{\"pressed\":\"BCTRLS_LEFT\",\"released\":\"ACTRLS_NONE\"}}]",
   "bypass_wm": "0",
   "cspot_config": "{\t\"deviceName\":\t\"BamBoom\",\t\"bitrate\":\t160,\t\"zeroConf\":\t1}",
   "dac_config": "",
