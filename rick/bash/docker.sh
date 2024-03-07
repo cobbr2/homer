@@ -91,7 +91,7 @@ wait_for_build() {
 
 deployment_status() {
   deployment="${1:?'deployment id'}"
-  gr deploy status "${deployment}" | tee /dev/tty | awk '$1 ~ /'"${deployment}"'/ { print $2 }'
+  tng deploy status "${deployment}" | tee /dev/tty | awk '$1 ~ /'"${deployment}"'/ { print $2 }'
 }
 
 wait_for_deploy() {
@@ -104,9 +104,9 @@ wait_for_deploy() {
 log_deployment_and_wait() {
   deployment="${1:?'deployment id'}"
 
-  # Still doesn't stop, since when we see END OF LOGS, gr deploy has stopped
+  # Still doesn't stop, since when we see END OF LOGS, tng deploy has stopped
   # sending output, so there's nothing to break the pipe.
-  gr deploy logs "${deployment}" --follow | sed '/END OF LOGS/q'
+  tng deploy logs "${deployment}" --follow | sed '/END OF LOGS/q'
 }
 
 validate_pushed_sha() {
@@ -115,7 +115,7 @@ validate_pushed_sha() {
   if [ "$pushed" != "$head" ] ; then
     cat 1>&2 <<-USE_THE_REAL_COMMAND
 	Your latest known origin SHA is not your local HEAD. Use
-	  gr deploy run ${service} ${pushed}
+	  tng deploy run ${service} ${pushed}
 	to deploy the latest origin commit if that's what you want. Otherwise, push!
 	USE_THE_REAL_COMMAND
     return 1
@@ -138,13 +138,7 @@ deploy-latest() {
 
   echo "====================== DEPLOYING ${service} ${pushed} ===================================="
 
-  deployment=$(gr deploy run $service $pushed | tee /dev/tty | sed -n '/Deployment ID: /s/Deployment ID: //p')
-
-  wait_for_deploy "${deployment}"
-
-  end_time=`date +%s`
-
-  echo "Total time (seconds): $(($end_time - $start_time))"
+  tng deploy run $service $pushed --follow
 }
 
 # For `tim` at the moment.
@@ -163,13 +157,13 @@ docker-local () {
   set +x
 }
 
-# Intended for following live logs, not deployment, since gr deploy logs --follow works for those.
+# Intended for following live logs, not deployment, since tng deploy logs --follow works for those.
 tng-log-follow-all () {
   # Needs work to manage job control
   local service=${1:-$(current_service)}
   local pods=$(gr service status ${service} --json | jq '."pod-status"[].name' | tr -d '"' | grep -v deploy)
   for pod in ${pods} ; do
-    stdbuf -oL -eL gr service logs ${service} ${pod} --follow | sed -u "s/^/${pod}: /" &
+    stdbuf -oL -eL tng service logs ${service} ${pod} --follow | sed -u "s/^/${pod}: /" &
   done
 }
 
@@ -193,7 +187,7 @@ service_debug() {
   local service=${1:-$(current_service)}
   local reason=$(current_story)
 
-  gr service debug ${service} "${reason}" -d3600
+  tng service debug ${service} "${reason}" -d3600
 }
 
 lgr() {

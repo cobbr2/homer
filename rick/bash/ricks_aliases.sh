@@ -31,6 +31,9 @@ alias be='bundle exec'
 
 alias more='less -R'
 
+alias puhsd=pushd
+alias pusdh=pushd
+
 export I="${GR_HOME}"
 
 # Get to the top level of the product I'm working on.
@@ -214,14 +217,28 @@ fn_exists () {
 
 west() {
   env=${1:-uat}
+  case ${env} in
+  i3)   env="integration3"
+  esac
   aws-environment "${env}" platform --region us-west-2 && kube-setup
 }
 
 east() {
   env=${1:-uat}
+  case ${env} in
+  i3)   env="integration3"
+  esac
   aws-environment "${env}" platform --region us-east-1 && kube-setup
 }
 
 dod() {
   aws-environment "dod" --region us-east-1 && kube-setup
+}
+
+dpw() {
+  env=${1:-uat}
+  case ${env} in
+  i3)   env="integration3"
+  esac
+  pushd ${IH_HOME}/DPW/terraforming/grnds-environments/${env}
 }

@@ -6,3 +6,5 @@ deploy_infra() {
 alias 'deploy-infra'='deploy_infra'
 
 export PLATFORM_API_USAGE_STYLE=light
+
+export IH_PRE_COMMIT_AUTO_STAGE=true

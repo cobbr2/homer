@@ -1,7 +1,7 @@
 
 alias gg="git grep --untracked" # Isn't there a way to default this in .gitconfig? (apparently not)
 alias gs="git status "
-alias gc="git checkout "
+alias gc="git switch "
 alias gb="git branch "
 alias gd="git diff --no-index"
 alias ga="git add "
