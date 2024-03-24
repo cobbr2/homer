@@ -493,3 +493,87 @@ mode to be UP, RIGHT, SELECT, which might not be a choice I have.
 Definitely don't understand what the ACTRL / BCTRL distinction is.
 
 Added config file to github.
+
+
+=========== SAMBA ============= 2024-03-22
+
+After all the frustration with samba in a container, I decided to just
+go ahead and install it straight on newsounds.  Annoying as hell.
+
+I hope this also helps learn something about discovery / UDP / UPNP / whatever
+the squeezebox protocol stuff...Net::UDAP is. I've come to suspect that my docker
+install doesn't allow some form of multi/broadcast to reach my containers, even
+though I'm using host containers.
+
+Following very old instructions at https://ubuntu.com/tutorials/install-and-configure-samba#2-installing-samba
+
+Saved terminal session at `/Users/rick/Documents/ubuntu_samba_install.txt`
+
+Note: I had to type:
+```
+ufw allow samba
+```
+as part of those instructions.  I think that was probably the magic I always needed.  And there's probably one of those for the squeeze protocol... fuzzball.
+
+UDAP searches come up with an LG protocol from the 2010s, so not the protocol we need.
+
+--
+
+Configuring Spotty:
+* Didn't see the LMS from my phone or web (apparently need mac app at least)
+* Disabled `ufw` completely
+* Had to re-enter password (had to recreate it, too)
+* Once I did, I got an admin screen I don't remember seeing before, so that's nice. 
+    * Configured just office & kitchen first.
+* Still can't see the devices.  https://github.com/michaelherger/Spotty-Plugin makes me think it's either port 4070 outbound or 5353/UDP, but I already disabled `ufw`....
+* Kind of odd that the server scan results now identifies spotify albums & such.
+
+2024-03-23
+* Set up youtube plugin; since not in host, I went ahead and install ed
+```
+sudo apt-get install libio-socket-ssl-perl libnet-ssleay-perl
+```
+but I'll probably have to install them into the container, too?
+Proactively checked by running apt-get update and apt-get install in the vbr-lms-1 container; if that helps, will need to build a proper image & push it (to dockerhub?) for recovery
+
+No: already installed; this ain't the problem.
+
+* OK, so restart the server and see if it  works...
+* No.
+* Added new secret to credential
+* Tried resetting all the fieldds
+* Don't see anything logged at console after startup log problems.
+* Restart from app doesn't log to docker logs either, though, so maybe logging somehow goes to server.log?
+* Disabled the plugin that would go to squeeze net for unknown functions, since that was shut off on 19 Mar
+* Logs ain't going to server.log either, AFAICT; bringing thos eup in the app shows same last line....
+
+* When I hit "Get Code", the app responds with "Changes have been saved."  I don't get prompted for authorization.
+* Tried Firefox. Same result.
+* Definitely see 403s in the log. Also see that it's still showing the first search I entered, rather than "recent" which should be the current search
+* Still get errors about "api/sounds/v1" & "Sounds & Effects menu"
+
+* Created new API application & credentials.  Got it to finally prompt with an access code, but my *app hasn't passed google review*, which means I probably picked wrong when I said "external" vs. "internal" application.
+
+===== Server (sounds, newsounds) Checklist:
+
+[x] Can directly connect to server from players 
+[x] Automatic rip works and rescans 
+[x] Can retag music 
+[x] Spotify works 
+[ ] Youtube works 
+[ ] Samba share name makes sense (s/sambashare/music/g)
+[ ] Backup & restore works and can handle OS upgrade (Now complicated by native Samba install)
+[ ] Music library synced *to* newsounds
+[ ] Music library syncs *from* newsounds to sounds as backup device
+[ ] Can discover from random players
+[ ] Retagging causes re-mp3 creation
+[ ] MP3 sync works without affecting music players
+[ ] Can swap between sounds & newsounds (will this require sounds LMS upgrade?)
+[ ] Bandcamp downloads automatically make it into the library
+[ ] Names of everything make sense
+[ ] Passwords are secured (google password manager) but usable
+[ ] Music Library view in SqueezeCommander shows just the flac dir
+[ ] No duplicates in newsounds inventory based on compression type
+[ ] Newsounds on near-tip LMS revision 
+[ ] Sounds upgraded to sensible OS
+[ ] Finance & project directories on sounds are secured
