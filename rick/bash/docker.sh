@@ -39,15 +39,44 @@ current_service() {
   basename $(git rev-parse --show-toplevel)
 }
 
-does_image_exist() {
+# Fix this to use a real stack someday, then add push_ops & pop_ops back into
+# does_image_exist so that has some utility outside of checking for main branch
+# builds
+push_ops() {
+  case "${AWS_ENVIRONMENT}" in
+  operations )
+    return 0 ;;
+  * )
+    PUSHED_ACCOUNT="${AWS_ENVIRONMENT}"
+    PUSHED_ROLE="${AWS_ENVIRONMENT_ROLE}"
+    USE_LEGACY_AWS_ENVIRONMENT=true aws-environment operations platform # Requires platform perms at moment
+    return 0
+    ;;
+  esac
+}
+
+pop_ops() {
+  if [ -z "${PUSHED_ACCOUNT}" ] ; then
+    echo "Popped all" 1>&2
+    return -1
+  fi
+  aws-environment "${PUSHED_ACCOUNT}" "${PUSHED_ROLE}"
+  unset PUSHED_ACCOUNT
+  unset PUSHED_ROLE
+}
+
+_does_image_exist() {
   if [[ $# -lt 2 ]]; then
       echo "Usage: $( basename $0 ) <repository-name> <image-tag>"
       return 1
   fi
 
+  # push_ops
   IMAGE_META="$( aws ecr describe-images --repository-name=$1 --image-ids=imageTag=$2 2> /dev/null )"
+  local image_status=$?
+  # pop_ops
 
-  if [[ $? == 0 ]]; then
+  if [[ $image_status == 0 ]]; then
       return 0
   else
       echo "$1:$2 not found"
@@ -57,7 +86,7 @@ does_image_exist() {
 
 # Now that this uses `gh pr checks`, it doesn't need (can't use) the sha to
 # check... so this really is private to the `wait_for_build` /
-# `release_lateest` stuff which make sure that we're in the right repository
+# `release_latest` stuff which make sure that we're in the right repository
 # and the latest sha is pushed.
 #
 # Design decision to let these low-level routines print their own status is
@@ -65,22 +94,33 @@ does_image_exist() {
 #
 # Bug: if there are required checks that haven't reported a status yet, gh pr
 # checks exits 0
-branch_head_is_built() {
+_branch_head_is_built() {
   local branch="${1:-$(pwb)}"
   gh pr checks --watch "${branch}"
-}
-
-# Can't use gh pr since no pr; not implemented yet, should check
-# for image existence
-main_branch_is_built() {
-  aws ecr
 }
 
 wait_for_build() {
   local branch="${1:-$(pwb)}"
   local start_time=$(date +%s)
 
-  until branch_head_is_built "${branch}" ; do
+  if [ "${branch}" == "$(main_branch)" ] ; then
+    # Can't use gh pr since no pr; have to check for image directly
+    # using operations account.
+    service="$(current_service)"
+    image_tag="$(git rev-parse HEAD)"
+    push_ops
+    until _does_image_exist "${service}" "${image_tag}" ; do
+      local current_time=$(date +%s)
+      cat 1>&2 <<-STILL_WAITING
+	Main branch build still does not exist. $(($current_time - $start_time))s
+	STILL_WAITING
+      sleep 10
+    done
+    pop_ops
+    return 0
+  fi
+
+  until _branch_head_is_built "${branch}" ; do
     local current_time=$(date +%s)
     cat 1>&2 <<-STILL_WAITING
 	Branch ${branch} is BROKEN (you should finish fixing wait_for_build). $(($current_time - $start_time))s

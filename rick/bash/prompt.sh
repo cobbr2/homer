@@ -32,7 +32,7 @@ prompt_function() {
   #   ;;
   # esac
   # use "${prompt_color}\$${RESET}" instead of "\$" below
-  local aws_env=$(aws-environment)
+  local aws_env="${AWS_ENVIRONMENT}"
   local aws_color_off="\[$(tput sgr 0)\]"
   local aws_color
   case "${aws_env}" in
@@ -57,7 +57,7 @@ prompt_function() {
   esac
   aws_color_on="\[${aws_color}\]"
 
-  case "${AWS_DEFAULT_REGION}" in
+  case "${AWS_REGION}" in
     us-east-1)
       region_arrow="→"
       ;;
@@ -70,7 +70,9 @@ prompt_function() {
   esac
 
   local git_color
-  if test $(git status 2> /dev/null | grep -c :) -eq 0; then
+  if [[ "${PWD}" =~ /potluck ]] ; then
+    git_color="\[${YELLOW}\]"
+  elif test $(git status 2> /dev/null | grep -c :) -eq 0; then
     git_color="\[${GREEN}\]"
   else
     git_color="\[${RED}\]"

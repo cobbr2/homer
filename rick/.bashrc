@@ -17,11 +17,23 @@ function path_rm {
   PATH="${new_path}"
 }
 
+# Could DRY up with above, not working on that today.
+function path_without {
+  pattern=${@:?"You must provide pattern(s) to remove; will automatically be grep -v"}
+  path_split | grep -v "${@}" | tr '\012' ':'
+}
+
 function path_has {
   path_split | egrep '^'"${1}"'$' >/dev/null
 }
 
+function path_force {
+  NEW_PATH="${1}:$(path_without "^${1}$")"
+  PATH="${NEW_PATH}"
+}
+
 function path_push {
+
   if ! path_has "${1}" ; then
     if path_split | fgrep '/.rvm/' > /dev/null ; then
       rvm_paths=$(path_split | fgrep '/.rvm/')

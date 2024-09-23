@@ -1,12 +1,14 @@
 #github-cli 2.12.1
 golang 1.21.3
+gomigrate 4.17.0
+istioctl 1.23.0
 java openjdk-18
 jq 1.6
 kubectl 1.24.13
 nodejs 14.17.0
+pre-commit 3.6.2
 python 3.9.6
-ruby 3.2.0
+ripgrep 13.0.0
+ruby 2.7.4
 shellcheck 0.8.0
 terraform 1.5.7 # Match TNG
-pre-commit 3.2.2
-ripgrep 13.0.0

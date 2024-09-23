@@ -86,6 +86,15 @@ squashmerge_cleanup() {(
     xargs -L1 -r git branch -D
 )}
 
+# prune removes any branches that have deleted upstreams. Doesn't
+# care about merge status, so can be dangerous -- it'll get rid of
+# any experimental branches we haven't pushed.
+branch_prune() {
+  git for-each-ref --format '%(refname:short) %(upstream:track)' | \
+    awk '$2 == "[gone]" {print $1}' | \
+    xargs -r git branch -D
+}
+
 pwb () {
   git status | sed -n -e '/On branch/s;^.* ;;p'
 }

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ $# -gt 0 ] ; then
+  cat << PROLOG
+---
+type: Kafka
+apiVersion: v1
+spec:
+  topics:
+PROLOG
+fi
+
+
+
+awk -v template="${template}" -v wack=whiz '
+BEGIN { print template }
+{
+  name = $1
+
+  print "   - name: " name
+  print "      schema: {}"
+  print "      description: Migrated from bobs repo. Owner should document"
+  print "      securityLevel: green"
+  print "      allowedProducers:"
+  print "        - '"'"'*'"'"'"
+  print "      allowedConsumers:"
+  print "        - '"'"'*'"'"'"
+}'

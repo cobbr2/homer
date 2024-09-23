@@ -1,0 +1,26 @@
+#!/bin/bash
+# Interceptor for tng commands that will also use local tngctl
+# if the PLATFORM_API_ADDR env var is set
+
+set -eo pipefail
+
+if nc -w 0 localhost 8000; then
+  server="--server http://localhost:8000";
+  export PLATFORM_API_ADDR="http://localhost:8000"
+  export PLATFORM_API_GRPC_ADDR="http://localhost:8001"
+
+  echo -n "server is local. "
+fi
+
+case "+${PLATFORM_API_ADDR}+" in
+++ ) exec "${IH_HOME}/engineering/bin/tng" "${@}" ;;
+esac
+
+cli="$IH_HOME/platform-api/build/local/cli";
+
+if [ -x "${cli}" ] ; then
+  echo "client is local. "
+  exec "${cli}" "${@}"
+else
+  echo "No local cli to go with over-ridden server, run make in platform-api"
+fi
