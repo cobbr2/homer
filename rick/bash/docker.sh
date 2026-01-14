@@ -123,7 +123,7 @@ wait_for_build() {
   until _branch_head_is_built "${branch}" ; do
     local current_time=$(date +%s)
     cat 1>&2 <<-STILL_WAITING
-	Branch ${branch} is BROKEN (you should finish fixing wait_for_build). $(($current_time - $start_time))s
+	Waiting for checks to succeed. $(($current_time - $start_time))s
 	STILL_WAITING
     sleep 10
   done

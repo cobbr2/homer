@@ -72,16 +72,28 @@ prompt_function() {
   local git_color
   if [[ "${PWD}" =~ /potluck ]] ; then
     git_color="\[${YELLOW}\]"
-  elif test $(git status 2> /dev/null | grep -c :) -eq 0; then
+  elif test $(git status -u 2> /dev/null | grep -c :) -eq 0; then
     git_color="\[${GREEN}\]"
   else
     git_color="\[${RED}\]"
   fi
 
+  local K8S_CTX=$(kubectl config current-context)
+  local K8S_INDIC=""
+  case "${aws_env}" in
+  *"${K8S_CTX}"* ) K8S_INDIC="\[${GREEN}\]✓${RESET}" ;;
+  * )   K8S_INDIC="\[${RED}\]${K8S_CTX}${RESET}" ;;
+  esac
+
   local BRANCH=$(__git_ps1)
-  local STATUS="${RESET}\[$aws_color_on\]\u@\h${region_arrow}\[${aws_color_off}\]${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}"
+  local STATUS="${RESET}\[$aws_color_on\]\u@\h${region_arrow}\[${aws_color_off}\]${K8S_INDIC}${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}"
 
   PS1="${STATUS}
 \$ "
 }
 PROMPT_COMMAND=prompt_function
+
+unprompt() {
+  PROMPT_COMMAND=''
+  PS1="$ "
+}

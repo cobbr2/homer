@@ -101,25 +101,150 @@ clone_ih_repo() {
   popd
 }
 
-work () {
+# Search for a service/component in pseudo-monorepos (kafka, potluck)
+# Returns the first matching directory path, or empty if not found
+# Usage: _find_in_monorepo <name> [prefer_source]
+#   If prefer_source is "source", source directories are searched first
+_find_in_monorepo() {
+  local name="${1}"
+  local prefer="${2:-container}"  # "source" or "container"
+  local alt_name="${name//-/}"    # Remove hyphens: loading-dock -> loadingdock
+  local alt_name2="${name//_/-}"  # Underscores to hyphens
+  local found=""
+  
+  # Build search paths based on preference
+  local kafka_paths=(
+    "${IH_HOME}/kafka/platform/${name}"
+    "${IH_HOME}/kafka/docker/${name}"
+  )
+  
+  local potluck_container_paths=(
+    "${IH_HOME}/potluck/platform/${name}"
+    "${IH_HOME}/potluck/containers/${name}"
+  )
+  
+  local potluck_source_paths=(
+    "${IH_HOME}/potluck/scala/src/main/com/grandrounds/${name}"
+    "${IH_HOME}/potluck/python/${name}"
+    "${IH_HOME}/potluck/go/${name}"
+    "${IH_HOME}/potluck/java/src/main/com/grandrounds/${name}"
+  )
+  
+  # Also check alternate names (without hyphens)
+  if [ "${alt_name}" != "${name}" ]; then
+    potluck_source_paths+=(
+      "${IH_HOME}/potluck/scala/src/main/com/grandrounds/${alt_name}"
+      "${IH_HOME}/potluck/python/${alt_name}"
+      "${IH_HOME}/potluck/go/${alt_name}"
+    )
+    potluck_container_paths+=(
+      "${IH_HOME}/potluck/containers/${alt_name}"
+    )
+  fi
+  
+  # Order search based on preference
+  local search_order=()
+  if [ "${prefer}" = "source" ]; then
+    search_order=("${potluck_source_paths[@]}" "${potluck_container_paths[@]}" "${kafka_paths[@]}")
+  else
+    search_order=("${kafka_paths[@]}" "${potluck_container_paths[@]}" "${potluck_source_paths[@]}")
+  fi
+  
+  for path in "${search_order[@]}"; do
+    if [ -d "${path}" ]; then
+      echo "${path}"
+      return 0
+    fi
+  done
+  
+  return 1
+}
+
+# List all matches in pseudo-monorepos (for debugging/info)
+_find_all_in_monorepo() {
+  local name="${1}"
+  local alt_name="${name//-/}"
+  local names=("${name}")
+  [ "${alt_name}" != "${name}" ] && names+=("${alt_name}")
+  
+  local all_patterns=(
+    "${IH_HOME}/kafka/platform"
+    "${IH_HOME}/kafka/docker"
+    "${IH_HOME}/potluck/platform"
+    "${IH_HOME}/potluck/containers"
+    "${IH_HOME}/potluck/scala/src/main/com/grandrounds"
+    "${IH_HOME}/potluck/python"
+    "${IH_HOME}/potluck/go"
+    "${IH_HOME}/potluck/java/src/main/com/grandrounds"
+  )
+  
+  for n in "${names[@]}"; do
+    for base in "${all_patterns[@]}"; do
+      local path="${base}/${n}"
+      if [ -d "${path}" ]; then
+        echo "${path}"
+      fi
+    done
+  done
+}
+
+work() {
+  local prefer_source="${2:-}"  # Optional second arg: "source" or "src" to prefer source dirs
   case "${1}" in
   Downloads | Documents | Desktop | .bash )
     dir=~/${1}
     ;;
   terraf[or][ro]m[-_]s*[-_]modules | tsm)
-    dir="${GR_HOME}/terraform-service-modules"
+    dir="${IH_HOME}/terraform-service-modules"
     ;;
   * )
-    dir="${GR_HOME}/${1}"
-    if [ ! -d $dir ] ; then
+    dir="${IH_HOME}/${1}"
+    if [ ! -d "$dir" ] ; then
       case "${1}" in
       */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
       esac
-      clone_ih_repo ${1}
+      # Try to find in pseudo-monorepos (kafka, potluck)
+      local monorepo_dir
+      if [ "${prefer_source}" = "source" ] || [ "${prefer_source}" = "src" ]; then
+        monorepo_dir=$(_find_in_monorepo "${1}" source)
+      else
+        monorepo_dir=$(_find_in_monorepo "${1}")
+      fi
+      if [ -n "${monorepo_dir}" ]; then
+        dir="${monorepo_dir}"
+        # Show relative path from IH_HOME for clarity
+        echo "(found in ${dir#${IH_HOME}/})"
+      else
+        # Not found locally, try cloning
+        clone_ih_repo ${1}
+      fi
     fi
     ;;
   esac
-  pushd $dir
+  pushd "$dir"
+}
+
+# Variant of work that prefers source directories over containers
+works() {
+  work "${1}" source
+}
+
+# Show all monorepo matches for a name
+workall() {
+  local name="${1:?'Name?'}"
+  local matches
+  matches=$(_find_all_in_monorepo "${name}")
+  if [ -z "${matches}" ]; then
+    # Check if it's a direct repo
+    if [ -d "${IH_HOME}/${name}" ]; then
+      echo "${IH_HOME}/${name}"
+    else
+      echo "No matches found for '${name}'"
+      return 1
+    fi
+  else
+    echo "${matches}"
+  fi
 }
 
 # See https://unix.stackexchange.com/a/692303/566094
@@ -136,9 +261,58 @@ _work_compgen_filenames() {
     compgen -d -S / -- $WORK_DIR"$cur" | sed -e 's|'$WORK_DIR'||'
 }
 
+# Generate completions from pseudo-monorepo directories
+_work_compgen_monorepo() {
+    local cur="$1"
+    local IH="${IH_HOME:-$HOME/ih_home}"
+    
+    # Kafka pseudo-monorepo
+    if [ -d "${IH}/kafka/platform" ]; then
+        for d in "${IH}/kafka/platform"/*/ ; do
+            local name=$(basename "$d")
+            [[ "$name" == _* ]] && continue  # Skip underscore-prefixed dirs
+            [[ "$name" == "$cur"* ]] && echo "$name "
+        done
+    fi
+    if [ -d "${IH}/kafka/docker" ]; then
+        for d in "${IH}/kafka/docker"/*/ ; do
+            local name=$(basename "$d")
+            [[ "$name" == _* ]] && continue
+            [[ "$name" == "$cur"* ]] && echo "$name "
+        done
+    fi
+    
+    # Potluck pseudo-monorepo
+    for base in "${IH}/potluck/containers" "${IH}/potluck/platform"; do
+        if [ -d "$base" ]; then
+            for d in "$base"/*/ ; do
+                local name=$(basename "$d")
+                [[ "$name" == _* ]] && continue
+                [[ "$name" == "$cur"* ]] && echo "$name "
+            done
+        fi
+    done
+    
+    # Potluck source directories
+    for base in "${IH}/potluck/scala/src/main/com/grandrounds" \
+                "${IH}/potluck/python" \
+                "${IH}/potluck/go"; do
+        if [ -d "$base" ]; then
+            for d in "$base"/*/ ; do
+                local name=$(basename "$d")
+                [[ "$name" == _* ]] && continue
+                [[ "$name" == "$cur"* ]] && echo "$name "
+            done
+        fi
+    done
+}
+
 _work_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=( $(_work_compgen_filenames "$cur") )
+    # Combine regular ih_home completions with monorepo completions, removing duplicates
+    COMPREPLY=( $(
+        { _work_compgen_filenames "$cur"; _work_compgen_monorepo "$cur"; } | sort -u
+    ) )
 }
 complete -o nospace -F _work_complete work
 
@@ -214,6 +388,8 @@ fn_exists () {
   declare -f -F $1 > /dev/null
   return $?
 }
+
+export i3="integration3"
 
 west() {
   env=${1:-uat}

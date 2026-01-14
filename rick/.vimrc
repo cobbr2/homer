@@ -19,8 +19,9 @@ set re=2
 " < Handle whitespace issues:
 " Show tabs as odd character, same with trailing spaces or tabs. Showing eol shows
 " all eols, which I don't want; normal view of ^M is fine.
-"set list lcs=tab:·⁖,trail:¶
-set list lcs=tab:▹·,trail:␠
+" We really don't want it turned on for Makefiles or Go, but haven't screwed daround with that yet..
+"set list lcs=tab:▹·,trail:␠
+
 " Remove trailing whitespace on save for files I care about
 autocmd FileType go,make,rb,ruby,slim,txt,c,cpp,java,php,python,py,markdown,yml,tf,sh,scala,sql autocmd BufWritePre <buffer> :%s/\s\+$//e
 " >

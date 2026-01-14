@@ -1,14 +1,26 @@
 #github-cli 2.12.1
-golang 1.21.3
+buf 0.51.1
+gcloud 457.0.0
+golang 1.25.4
+golangci-lint 2.1.6
 gomigrate 4.17.0
+helm 3.6.1
 istioctl 1.23.0
-java openjdk-18
+java corretto-8.432.06.1
 jq 1.6
 kubectl 1.24.13
-nodejs 14.17.0
-pre-commit 3.6.2
-python 3.9.6
+nodejs 20.0.0
+postgres 17.5
+pre-commit 4.3.0
+protoc 24.3
+# for platform-api:
+python 3.9.7
+#python 3.9.6
 ripgrep 13.0.0
-ruby 2.7.4
+ruby 2.7.2
 shellcheck 0.8.0
-terraform 1.5.7 # Match TNG
+terraform 1.0.3
+yq 4.40.4
+mkcert 1.4.4
+uv 0.8.22
+vault 1.8.3

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Check for required environment variables
+if [[ -z "$JIRA_USERNAME" || -z "$JIRA_API_TOKEN" ]]; then
+  echo "Error: JIRA_USERNAME and JIRA_API_TOKEN must be set in the environment."
+  exit 1
+fi
+
+# Check for at least 2 arguments: method and URL
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 <METHOD> <URL> [DATA]"
+  echo "Example: $0 GET https://your-domain.atlassian.net/rest/api/3/issue/KEY-123"
+  exit 1
+fi
+
+METHOD=$1
+URL=$2
+DATA=$3
+
+# Encode credentials
+AUTH=$(echo -n "$JIRA_USERNAME:$JIRA_API_TOKEN" | base64)
+
+# Build curl command
+CMD=(curl -s -X "$METHOD" "$URL" \
+  -H "Authorization: Basic $AUTH" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json")
+
+# If data is provided, add it
+if [[ -n "$DATA" ]]; then
+  CMD+=(-d "$DATA")
+fi
+
+# Execute the curl command
+"${CMD[@]}"

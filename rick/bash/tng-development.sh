@@ -60,4 +60,98 @@ tng-version () {
 export IMAGE_BUILDER_ROOT="${IH_HOME}/image-builder"
 path_append "${IMAGE_BUILDER_ROOT}/bin"
 
-alias service-compiler="tng params exec --service platform-api -- $IH_HOME/platform-api/build/local/service-compiler"
+alias service-compiler="tng params exec --service platform-api  --fs local -- $IH_HOME/platform-api/build/local/service-compiler"
+
+# Assumes your platform-map & platform-api are good enough
+tng_get_infra() {
+  local tar=false
+  local service
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -t|--tar)
+        tar=true
+        shift
+        ;;
+      -h|--help)
+        cat <<EOF
+Usage: tng_get_infra [OPTIONS]
+
+Compiles and extracts infrastructure configuration for the current service.
+
+OPTIONS:
+  -t, --tar    Save output as a tar file instead of extracting to tf/ directory
+  -h, --help   Display this help message
+
+DESCRIPTION:
+  This function must be run from a service's platform directory containing
+  infrastructure.yaml and serviceConfig.yaml files.
+
+  By default, it extracts the compiled infrastructure to a 'tf/' directory.
+  With the --tar option, it saves the output as '_<service>_tf.tgz'.
+
+EXAMPLES:
+  tng_get_infra          # Extract to tf/ directory
+  tng_get_infra --tar    # Save as tar file
+EOF
+        return 0
+        ;;
+      -*)
+        echo "Error: Unknown option: $1" >&2
+        echo "Use -h or --help for usage information" >&2
+        return 1
+        ;;
+      *)
+        echo "Error: Unexpected argument: $1" >&2
+        echo "Use -h or --help for usage information" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  # Validate prerequisites
+  if [ ! -f infrastructure.yaml ]; then
+    echo "Error: Must be in the service's platform directory (infrastructure.yaml not found)" >&2
+    return 1
+  fi
+
+  if [ ! -f serviceConfig.yaml ]; then
+    echo "Error: serviceConfig.yaml not found" >&2
+    return 1
+  fi
+
+  # Create tf directory if needed (when not using tar mode)
+  if ! $tar; then
+    if [ ! -d tf ]; then
+      mkdir tf
+    fi
+  fi
+
+  # Extract service name
+  service="$(sed -E -ne '/^(app|service_name):/s/^(app|service_name): *//p' serviceConfig.yaml)"
+
+  if [ -z "$service" ]; then
+    echo "Error: Could not extract service name from serviceConfig.yaml" >&2
+    return 1
+  fi
+
+  # Compile and process infrastructure
+  service-compiler infra "${PWD}" "$(git rev-parse HEAD)" --service "${service}" | (
+    if $tar; then
+      cat >"_${service}_tf.tgz"
+      echo "Infrastructure saved to _${service}_tf.tgz"
+    else
+      cd tf
+      tar -xz
+      echo "Infrastructure extracted to tf/"
+    fi
+  )
+}
+alias tng-get-infra=tng_get_infra
+
+tng_tf_pod() {
+  echo "You may have to copy your id_rsa file into the pod as well" 1>&2
+  "${IH_HOME}/kore/bin/run-image" -r platform-terraformer -n deploy -i platform-api-deploy
+}
+alias tng-tf-pod=tng_tf_pod
