@@ -2,6 +2,14 @@
 # http://effectif.com/git/config
 # http://sitaramc.github.com/2-command-line-usage/souped-up-bash-prompt.html
 # http://zerowidth.com/blog/2008/11/29/command-prompt-tips.html
+
+# Skip prompt customization when running in Cursor Agent
+if [ -n "$CURSOR_AGENT" ] || [ -n "$CURSOR_TRACE_ID" ]; then
+  # Absolute minimum prompt for Cursor Agent to avoid parsing issues
+  PS1='$ '
+  return 0
+fi
+
 prompt_function() {
   local        BLUE='\[\033[0;34m\]'
   local         RED='\[\033[0;31m\]'
