@@ -217,6 +217,10 @@ work() {
       else
         # Not found locally, try cloning
         clone_ih_repo ${1}
+        # If clone succeeded, refresh completions cache
+        if [ -d "$dir" ]; then
+          work-refresh
+        fi
       fi
     fi
     ;;
@@ -247,74 +251,66 @@ workall() {
   fi
 }
 
-# See https://unix.stackexchange.com/a/692303/566094
-_work_compgen_filenames() {
-    local cur="$1"
-    local WORK_DIR=$HOME/gr_home/
+# Cache file for work command completions (regenerate with work-refresh)
+_WORK_CACHE="${HOME}/.cache/work_completions"
 
-    # Files, excluding directories:
-    grep -v -F -f <(compgen -d -P ^ -S '$' -- $WORK_DIR"$cur") \
-        <(compgen -f -P ^ -S '$' -- $WORK_DIR"$cur") |
-        sed -e 's|^\^'$WORK_DIR'||' -e 's/\$$/ /'
-
-    # Directories:
-    compgen -d -S / -- $WORK_DIR"$cur" | sed -e 's|'$WORK_DIR'||'
-}
-
-# Generate completions from pseudo-monorepo directories
-_work_compgen_monorepo() {
-    local cur="$1"
+# Regenerate the work completions cache
+work-refresh() {
     local IH="${IH_HOME:-$HOME/ih_home}"
+    local cache_dir="${HOME}/.cache"
+    [ -d "$cache_dir" ] || mkdir -p "$cache_dir"
     
-    # Kafka pseudo-monorepo
-    if [ -d "${IH}/kafka/platform" ]; then
-        for d in "${IH}/kafka/platform"/*/ ; do
-            local name=$(basename "$d")
-            [[ "$name" == _* ]] && continue  # Skip underscore-prefixed dirs
-            [[ "$name" == "$cur"* ]] && echo "$name "
-        done
-    fi
-    if [ -d "${IH}/kafka/docker" ]; then
-        for d in "${IH}/kafka/docker"/*/ ; do
-            local name=$(basename "$d")
-            [[ "$name" == _* ]] && continue
-            [[ "$name" == "$cur"* ]] && echo "$name "
-        done
-    fi
-    
-    # Potluck pseudo-monorepo
-    for base in "${IH}/potluck/containers" "${IH}/potluck/platform"; do
-        if [ -d "$base" ]; then
-            for d in "$base"/*/ ; do
-                local name=$(basename "$d")
-                [[ "$name" == _* ]] && continue
-                [[ "$name" == "$cur"* ]] && echo "$name "
-            done
+    {
+        # Top-level ih_home directories
+        if [ -d "${IH}" ]; then
+            ls -1 "${IH}" 2>/dev/null
         fi
-    done
+        
+        # Kafka pseudo-monorepo
+        for base in "${IH}/kafka/platform" "${IH}/kafka/docker"; do
+            [ -d "$base" ] && ls -1 "$base" 2>/dev/null
+        done
+        
+        # Potluck containers/platform
+        for base in "${IH}/potluck/containers" "${IH}/potluck/platform"; do
+            [ -d "$base" ] && ls -1 "$base" 2>/dev/null
+        done
+        
+        # Potluck source directories
+        for base in "${IH}/potluck/scala/src/main/com/grandrounds" \
+                    "${IH}/potluck/python" \
+                    "${IH}/potluck/go" \
+                    "${IH}/potluck/java/src/main/com/grandrounds"; do
+            [ -d "$base" ] && ls -1 "$base" 2>/dev/null
+        done
+
+        # Bobs if it exists
+        for base in "${IH}/bobs/services" "${IH}/bobs/libs"; do
+            [ -d "$base" ] && ls -1 "$base" 2>/dev/null
+        done
+    } | grep -v '^_' | sort -u > "${_WORK_CACHE}"
     
-    # Potluck source directories
-    for base in "${IH}/potluck/scala/src/main/com/grandrounds" \
-                "${IH}/potluck/python" \
-                "${IH}/potluck/go"; do
-        if [ -d "$base" ]; then
-            for d in "$base"/*/ ; do
-                local name=$(basename "$d")
-                [[ "$name" == _* ]] && continue
-                [[ "$name" == "$cur"* ]] && echo "$name "
-            done
-        fi
-    done
+    echo "Refreshed work completions cache: $(wc -l < "${_WORK_CACHE}") entries"
 }
 
 _work_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
-    # Combine regular ih_home completions with monorepo completions, removing duplicates
-    COMPREPLY=( $(
-        { _work_compgen_filenames "$cur"; _work_compgen_monorepo "$cur"; } | sort -u
-    ) )
+    
+    # If cache doesn't exist, generate it in background and use slow path once
+    if [ ! -f "${_WORK_CACHE}" ]; then
+        # Generate cache in background for next time
+        ( work-refresh >/dev/null 2>&1 & )
+        # Fall back to just ih_home top-level for now
+        local IH="${IH_HOME:-$HOME/ih_home}"
+        COMPREPLY=( $(compgen -W "$(ls -1 "${IH}" 2>/dev/null)" -- "$cur") )
+        return
+    fi
+    
+    # Fast path: use cached completions
+    COMPREPLY=( $(grep "^${cur}" "${_WORK_CACHE}" 2>/dev/null) )
 }
 complete -o nospace -F _work_complete work
+complete -o nospace -F _work_complete works
 
 grr () {
   cd "${GR_HOME}"
