@@ -200,26 +200,31 @@ work() {
   * )
     dir="${IH_HOME}/${1}"
     if [ ! -d "$dir" ] ; then
-      case "${1}" in
-      */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
-      esac
-      # Try to find in pseudo-monorepos (kafka, potluck)
-      local monorepo_dir
-      if [ "${prefer_source}" = "source" ] || [ "${prefer_source}" = "src" ]; then
-        monorepo_dir=$(_find_in_monorepo "${1}" source)
+      # Check worktree cache for worktrees not directly in ih_home
+      local wt_path
+      wt_path=$(grep "^${1}:" "${_WORKTREE_CACHE}" 2>/dev/null | head -1 | cut -d: -f2-)
+      if [ -n "$wt_path" ] && [ -d "$wt_path" ]; then
+        dir="$wt_path"
       else
-        monorepo_dir=$(_find_in_monorepo "${1}")
-      fi
-      if [ -n "${monorepo_dir}" ]; then
-        dir="${monorepo_dir}"
-        # Show relative path from IH_HOME for clarity
-        echo "(found in ${dir#${IH_HOME}/})"
-      else
-        # Not found locally, try cloning
-        clone_ih_repo ${1}
-        # If clone succeeded, refresh completions cache
-        if [ -d "$dir" ]; then
-          work-refresh
+        case "${1}" in
+        */* ) echo "No such file or directory: ${dir}" ; return -1 ;;
+        esac
+        # Try to find in pseudo-monorepos (kafka, potluck)
+        local monorepo_dir
+        if [ "${prefer_source}" = "source" ] || [ "${prefer_source}" = "src" ]; then
+          monorepo_dir=$(_find_in_monorepo "${1}" source)
+        else
+          monorepo_dir=$(_find_in_monorepo "${1}")
+        fi
+        if [ -n "${monorepo_dir}" ]; then
+          dir="${monorepo_dir}"
+          echo "(found in ${dir#${IH_HOME}/})"
+        else
+          # Not found locally, try cloning
+          clone_ih_repo ${1}
+          if [ -d "$dir" ]; then
+            work-refresh
+          fi
         fi
       fi
     fi
@@ -253,12 +258,25 @@ workall() {
 
 # Cache file for work command completions (regenerate with work-refresh)
 _WORK_CACHE="${HOME}/.cache/work_completions"
+# Worktree path mapping: basename -> absolute path (for worktrees outside ih_home top-level)
+_WORKTREE_CACHE="${HOME}/.cache/work_worktrees"
 
 # Regenerate the work completions cache
 work-refresh() {
     local IH="${IH_HOME:-$HOME/ih_home}"
     local cache_dir="${HOME}/.cache"
     [ -d "$cache_dir" ] || mkdir -p "$cache_dir"
+    
+    # Build worktree path mapping (basename -> absolute path).
+    # Reads gitdir files directly — no git commands, pure filesystem.
+    > "${_WORKTREE_CACHE}"
+    local gitdir_file wt_git_path wt_dir
+    for gitdir_file in "${IH}"/*/.git/worktrees/*/gitdir; do
+        [ -f "$gitdir_file" ] || continue
+        read -r wt_git_path < "$gitdir_file"
+        wt_dir=$(dirname "$wt_git_path")
+        echo "$(basename "$wt_dir"):${wt_dir}" >> "${_WORKTREE_CACHE}"
+    done
     
     {
         # Top-level ih_home directories
@@ -288,9 +306,16 @@ work-refresh() {
         for base in "${IH}/bobs/services" "${IH}/bobs/libs"; do
             [ -d "$base" ] && ls -1 "$base" 2>/dev/null
         done
+
+        # Worktree basenames (catches worktrees outside ih_home top-level)
+        if [ -s "${_WORKTREE_CACHE}" ]; then
+            cut -d: -f1 "${_WORKTREE_CACHE}"
+        fi
     } | grep -v '^_' | sort -u > "${_WORK_CACHE}"
     
-    echo "Refreshed work completions cache: $(wc -l < "${_WORK_CACHE}") entries"
+    local wt_count=0
+    [ -s "${_WORKTREE_CACHE}" ] && wt_count=$(wc -l < "${_WORKTREE_CACHE}")
+    echo "Refreshed work completions cache: $(wc -l < "${_WORK_CACHE}") entries (${wt_count} worktrees)"
 }
 
 _work_complete() {
