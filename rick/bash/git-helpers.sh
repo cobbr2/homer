@@ -13,6 +13,24 @@ alias gls="git log --no-merges --pretty=medium --stat"
 alias gp="git pull"
 alias branch-cleanup=branch_cleanup
 
+# Wrapper to auto-refresh work completions cache on worktree changes.
+# Aliases like gc="git switch" expand first, then dispatch through here;
+# `command git` ensures we call the real binary.
+git() {
+  command git "$@"
+  local rc=$?
+  case "$1" in
+  worktree)
+    case "${2:-}" in
+    add|remove|prune|move)
+      ( work-refresh >/dev/null 2>&1 & )
+      ;;
+    esac
+    ;;
+  esac
+  return $rc
+}
+
 # Not implementing the actual color stuff today; don't know how that worked
 # on Linux
 color() {

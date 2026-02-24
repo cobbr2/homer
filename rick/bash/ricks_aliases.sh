@@ -331,6 +331,13 @@ _work_complete() {
         return
     fi
     
+    # Detect worktree additions/removals (catches IDE-created worktrees; ~10ms)
+    local IH="${IH_HOME:-$HOME/ih_home}"
+    local wt_now=0 cached_wt=0
+    wt_now=$(ls -d "${IH}"/*/.git/worktrees/*/gitdir 2>/dev/null | wc -l)
+    [ -f "${_WORKTREE_CACHE}" ] && cached_wt=$(wc -l < "${_WORKTREE_CACHE}")
+    [ "$wt_now" -ne "$cached_wt" ] 2>/dev/null && ( work-refresh >/dev/null 2>&1 & )
+
     # Fast path: use cached completions
     COMPREPLY=( $(grep "^${cur}" "${_WORK_CACHE}" 2>/dev/null) )
 }
