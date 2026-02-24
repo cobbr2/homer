@@ -9,7 +9,7 @@ istioctl 1.23.0
 java corretto-8.432.06.1
 jq 1.6
 kubectl 1.24.13
-nodejs 20.0.0
+nodejs 16.2.0
 postgres 17.5
 pre-commit 4.3.0
 protoc 24.3
@@ -19,7 +19,7 @@ python 3.9.7
 ripgrep 13.0.0
 ruby 2.7.2
 shellcheck 0.8.0
-terraform 1.0.3
+terraform 1.7.0
 yq 4.40.4
 mkcert 1.4.4
 uv 0.8.22

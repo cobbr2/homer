@@ -1,21 +1,21 @@
-# Good enough for pure server work, but codegen is cli side.
-ltng ()
-{
-  local cli="$IH_HOME/platform-api/build/local/cli";
-  if [ ! -x "$cli" ] ; then
-    echo "using normal (not platform-api) tng client" 1>&2
-    cli='tng'
-  fi
-
-  local server=''
-  if nc -w 0 localhost 8000 ; then
-    server="--server http://localhost:8000"
-  else
-    echo "using ${AWS_ENVIRONMENT} server" 1>&2
-  fi
-
-  "$cli" ${server} --timeout 120 "$@"
-}
+# # Good enough for pure server work, but codegen is cli side.
+# ltng ()
+# {
+#   local cli="$IH_HOME/platform-api/build/local/cli";
+#   if [ ! -x "$cli" ] ; then
+#     echo "using normal (not platform-api) tng client" 1>&2
+#     cli='tng'
+#   fi
+#
+#   local server=''
+#   if nc -w 0 localhost 8000 ; then
+#     server="--server http://localhost:8000"
+#   else
+#     echo "using ${AWS_ENVIRONMENT} server" 1>&2
+#   fi
+#
+#   "$cli" ${server} --timeout 120 "$@"
+# }
 
 # Set up for making sure *everything* uses local or remote.
 tng-version () {

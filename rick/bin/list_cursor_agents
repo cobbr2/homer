@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""
+List all Cursor agent conversations by name, as they appear in the Agents panel.
+"""
+
+import sqlite3
+import json
+import os
+from datetime import datetime
+from collections import defaultdict
+
+def get_workspace_path(workspace_id):
+    """Get the workspace path from workspace.json"""
+    workspace_json = os.path.expanduser(
+        f"~/Library/Application Support/Cursor/User/workspaceStorage/{workspace_id}/workspace.json"
+    )
+    if os.path.exists(workspace_json):
+        try:
+            with open(workspace_json, 'r') as f:
+                data = json.load(f)
+                if 'folder' in data:
+                    return data['folder'].replace('file://', '')
+                elif 'workspace' in data:
+                    return os.path.dirname(data['workspace'].replace('file://', ''))
+        except:
+            pass
+    return None
+
+def list_agents_from_db(db_path, workspace_id=None):
+    """Extract agent conversations from a database"""
+    if not os.path.exists(db_path):
+        return []
+    
+    agents = []
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Get all composerData entries (these contain agent metadata)
+        cursor.execute("SELECT key, value FROM cursorDiskKV WHERE key LIKE 'composerData:%'")
+        rows = cursor.fetchall()
+        
+        for key, value in rows:
+            try:
+                if isinstance(value, bytes):
+                    data = json.loads(value.decode('utf-8'))
+                else:
+                    data = json.loads(value)
+                
+                composer_id = key.replace('composerData:', '')
+                
+                # Extract agent name/title
+                name = data.get('title') or data.get('name') or f"Untitled ({composer_id[:8]})"
+                
+                # Get timestamps (convert from milliseconds if needed)
+                created_at = data.get('createdAt') or data.get('created')
+                updated_at = data.get('updatedAt') or data.get('updated')
+                
+                # Format timestamps
+                def format_timestamp(ts):
+                    if not ts:
+                        return None
+                    try:
+                        # Handle both string and numeric timestamps
+                        if isinstance(ts, str):
+                            ts = int(ts)
+                        # Assume milliseconds if > 1e10
+                        if ts > 1e10:
+                            ts = ts / 1000
+                        return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                    except:
+                        return str(ts)
+                
+                created_at_formatted = format_timestamp(created_at)
+                updated_at_formatted = format_timestamp(updated_at)
+                
+                # Count messages
+                cursor.execute(
+                    "SELECT COUNT(*) FROM cursorDiskKV WHERE key LIKE ?",
+                    (f'bubbleId:{composer_id}:%',)
+                )
+                message_count = cursor.fetchone()[0]
+                
+                agents.append({
+                    'composer_id': composer_id,
+                    'name': name,
+                    'created_at': created_at,
+                    'updated_at': updated_at,
+                    'created_at_formatted': created_at_formatted,
+                    'updated_at_formatted': updated_at_formatted,
+                    'message_count': message_count,
+                    'workspace_id': workspace_id,
+                    'db_path': db_path
+                })
+            except Exception as e:
+                # Skip entries that can't be parsed
+                continue
+        
+        conn.close()
+    except Exception as e:
+        # Database might not exist or be accessible
+        pass
+    
+    return agents
+
+def main():
+    print("=== Cursor Agent Conversations ===\n")
+    
+    all_agents = []
+    
+    # Check global storage
+    global_db = os.path.expanduser(
+        "~/Library/Application Support/Cursor/User/globalStorage/state.vscdb"
+    )
+    global_agents = list_agents_from_db(global_db, workspace_id=None)
+    for agent in global_agents:
+        agent['workspace_path'] = None
+    all_agents.extend(global_agents)
+    
+    # Check workspace-specific storage
+    workspace_storage = os.path.expanduser(
+        "~/Library/Application Support/Cursor/User/workspaceStorage"
+    )
+    if os.path.exists(workspace_storage):
+        for workspace_id in os.listdir(workspace_storage):
+            workspace_dir = os.path.join(workspace_storage, workspace_id)
+            if os.path.isdir(workspace_dir):
+                workspace_db = os.path.join(workspace_dir, "state.vscdb")
+                workspace_path = get_workspace_path(workspace_id)
+                
+                workspace_agents = list_agents_from_db(workspace_db, workspace_id=workspace_id)
+                for agent in workspace_agents:
+                    agent['workspace_path'] = workspace_path
+                all_agents.extend(workspace_agents)
+    
+    # Sort by updated time (most recent first)
+    def get_sort_time(agent):
+        ts = agent.get('updated_at') or agent.get('created_at')
+        if isinstance(ts, (int, float)):
+            return ts
+        if isinstance(ts, str):
+            try:
+                return int(ts)
+            except:
+                return 0
+        return 0
+    
+    all_agents.sort(key=get_sort_time, reverse=True)
+    
+    # Group by workspace for display
+    by_workspace = defaultdict(list)
+    for agent in all_agents:
+        workspace = agent.get('workspace_path') or "Global (no workspace)"
+        by_workspace[workspace].append(agent)
+    
+    # Display results
+    for workspace, agents in sorted(by_workspace.items()):
+        print(f"\n📁 {workspace}")
+        print("─" * 80)
+        for agent in agents:
+            name = agent['name']
+            msg_count = agent['message_count']
+            updated = agent.get('updated_at_formatted') or agent.get('created_at_formatted') or 'Unknown'
+            print(f"  • {name}")
+            print(f"    Messages: {msg_count} | Updated: {updated}")
+            print()
+    
+    print(f"\nTotal agents: {len(all_agents)}")
+
+if __name__ == "__main__":
+    main()

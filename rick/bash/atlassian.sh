@@ -1,7 +1,7 @@
-jira() {
+jiraq () {
     open https://grandrounds.atlassian.net/secure/QuickSearch.jspa\?searchString\="$1"
 }
 
-conf() {
+confq () {
     open https://grandrounds.atlassian.net/wiki/dosearchsite.action\?queryString\="$1"
 }

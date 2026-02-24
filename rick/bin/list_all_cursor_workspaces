@@ -1,0 +1,90 @@
+#!/bin/bash
+# List all Cursor workspaces with their paths and last activity times
+
+echo "=== All Cursor Workspaces (sorted by last activity) ==="
+echo ""
+
+# Create temporary files to store results
+temp_file=$(mktemp)
+workspace_data=$(mktemp)
+chat_data=$(mktemp)
+
+# First pass: collect all workspace paths and their times
+for ws_dir in ~/Library/Application\ Support/Cursor/User/workspaceStorage/*/; do
+    if [ -f "${ws_dir}workspace.json" ]; then
+        # Try to get folder path first
+        ws_path=$(grep -o '"folder": "[^"]*"' "${ws_dir}workspace.json" 2>/dev/null | sed 's/"folder": "file:\/\///' | sed 's/"$//')
+        
+        # If no folder, try workspace file path
+        if [ -z "$ws_path" ]; then
+            ws_path=$(grep -o '"workspace": "[^"]*"' "${ws_dir}workspace.json" 2>/dev/null | sed 's/"workspace": "file:\/\///' | sed 's/"$//')
+            # Extract directory from workspace file path
+            if [ -n "$ws_path" ]; then
+                ws_path=$(dirname "$ws_path")
+            fi
+        fi
+        
+        if [ -n "$ws_path" ] && [ -d "$ws_path" ]; then
+            # Normalize path (resolve to canonical form)
+            normalized_path=$(cd "$ws_path" 2>/dev/null && pwd || echo "$ws_path")
+            
+            # Get workspace directory modification time
+            ws_mod_time=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$ws_dir" 2>/dev/null)
+            
+            # Get most recent file modification time in workspace storage (including chat sessions)
+            recent_file_time=$(find "$ws_dir" -type f -exec stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" {} \; 2>/dev/null | sort -r | head -1)
+            
+            # Use the most recent time
+            if [ -n "$recent_file_time" ] && [ "$recent_file_time" \> "$ws_mod_time" ]; then
+                display_time="$recent_file_time"
+            else
+                display_time="$ws_mod_time"
+            fi
+            
+            # Store workspace data: time|path
+            echo "$display_time|$normalized_path" >> "$workspace_data"
+            
+            # Count chat sessions (only JSON files in chatSessions, not editing sessions)
+            chat_count=$(find "$ws_dir" -type f -path "*/chatSessions/*.json" 2>/dev/null | wc -l | tr -d ' ')
+            if [ "$chat_count" -gt 0 ]; then
+                echo "$normalized_path|$chat_count" >> "$chat_data"
+            fi
+        fi
+    fi
+done
+
+# Process workspace data: for each unique path, keep the most recent time
+awk -F'|' '
+{
+    path = $2
+    time = $1
+    if (!(path in times) || time > times[path]) {
+        times[path] = time
+    }
+}
+END {
+    for (path in times) {
+        print times[path] " | " path
+    }
+}' "$workspace_data" | sort -r
+
+rm "$workspace_data"
+
+echo ""
+echo "=== Workspaces with Chat Sessions ==="
+echo ""
+
+# Sum chat counts for each path
+awk -F'|' '
+{
+    path = $1
+    count = $2
+    totals[path] += count
+}
+END {
+    for (path in totals) {
+        print "  " path " (" totals[path] " chat session(s))"
+    }
+}' "$chat_data" | sort
+
+rm "$chat_data"
