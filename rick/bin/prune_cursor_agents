@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""
+Remove all 0-message Cursor agent conversations from the workspace databases.
+
+These are typically empty "Untitled" agents created when a new composer tab is
+opened but never used.
+"""
+
+import sqlite3
+import json
+import os
+import sys
+
+
+def get_workspace_path(workspace_id):
+    workspace_json = os.path.expanduser(
+        f"~/Library/Application Support/Cursor/User/workspaceStorage/{workspace_id}/workspace.json"
+    )
+    if os.path.exists(workspace_json):
+        try:
+            with open(workspace_json, 'r') as f:
+                data = json.load(f)
+                if 'folder' in data:
+                    return data['folder'].replace('file://', '')
+                elif 'workspace' in data:
+                    return os.path.dirname(data['workspace'].replace('file://', ''))
+        except Exception:
+            pass
+    return None
+
+
+def find_empty_agents(db_path):
+    """Find 0-message agent composer IDs in a database."""
+    if not os.path.exists(db_path):
+        return []
+
+    empty = []
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT key, value FROM cursorDiskKV WHERE key LIKE 'composerData:%'")
+        rows = cursor.fetchall()
+
+        for key, value in rows:
+            try:
+                composer_id = key.replace('composerData:', '')
+
+                cursor.execute(
+                    "SELECT COUNT(*) FROM cursorDiskKV WHERE key LIKE ?",
+                    (f'bubbleId:{composer_id}:%',)
+                )
+                message_count = cursor.fetchone()[0]
+
+                if message_count == 0:
+                    if isinstance(value, bytes):
+                        data = json.loads(value.decode('utf-8'))
+                    else:
+                        data = json.loads(value)
+                    name = data.get('title') or data.get('name') or f"Untitled ({composer_id[:8]})"
+                    empty.append((composer_id, name))
+            except Exception:
+                continue
+
+        conn.close()
+    except Exception:
+        pass
+
+    return empty
+
+
+def delete_agents(db_path, composer_ids):
+    """Delete composer entries for the given IDs from a database."""
+    if not composer_ids:
+        return 0
+
+    deleted = 0
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        for cid in composer_ids:
+            # Remove the composerData entry
+            cursor.execute("DELETE FROM cursorDiskKV WHERE key = ?", (f'composerData:{cid}',))
+            deleted += cursor.rowcount
+
+            # Remove any other keys associated with this composer (shouldn't exist
+            # for 0-message agents, but clean up just in case)
+            cursor.execute("DELETE FROM cursorDiskKV WHERE key LIKE ?", (f'bubbleId:{cid}:%',))
+
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"  Error deleting from {db_path}: {e}", file=sys.stderr)
+
+    return deleted
+
+
+def collect_databases():
+    """Yield (db_path, label) for global and all workspace databases."""
+    global_db = os.path.expanduser(
+        "~/Library/Application Support/Cursor/User/globalStorage/state.vscdb"
+    )
+    yield global_db, "Global"
+
+    workspace_storage = os.path.expanduser(
+        "~/Library/Application Support/Cursor/User/workspaceStorage"
+    )
+    if os.path.exists(workspace_storage):
+        for workspace_id in os.listdir(workspace_storage):
+            workspace_dir = os.path.join(workspace_storage, workspace_id)
+            if os.path.isdir(workspace_dir):
+                workspace_db = os.path.join(workspace_dir, "state.vscdb")
+                if os.path.exists(workspace_db):
+                    label = get_workspace_path(workspace_id) or workspace_id
+                    yield workspace_db, label
+
+
+def main():
+    dry_run = "--dry-run" in sys.argv or "-n" in sys.argv
+
+    if dry_run:
+        print("=== Dry run: showing 0-message agents that would be removed ===\n")
+    else:
+        print("=== Pruning 0-message Cursor agents ===\n")
+
+    total = 0
+
+    for db_path, label in collect_databases():
+        empty = find_empty_agents(db_path)
+        if not empty:
+            continue
+
+        print(f"  {label}")
+        for composer_id, name in empty:
+            print(f"    - {name} ({composer_id[:8]}...)")
+
+        if not dry_run:
+            deleted = delete_agents(db_path, [cid for cid, _ in empty])
+            print(f"    Removed {deleted} agent(s)")
+
+        total += len(empty)
+        print()
+
+    if total == 0:
+        print("No 0-message agents found.")
+    elif dry_run:
+        print(f"Would remove {total} agent(s). Run without --dry-run to delete.")
+    else:
+        print(f"Removed {total} agent(s) total.")
+
+
+if __name__ == "__main__":
+    main()
