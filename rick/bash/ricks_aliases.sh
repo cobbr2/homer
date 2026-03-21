@@ -420,23 +420,61 @@ fn_exists () {
 export i3="integration3"
 
 west() {
+  local env cluster_prefix
   env=${1:-uat}
+  cluster_prefix=${2:-service-}
   case ${env} in
   i3)   env="integration3"
   esac
-  aws-environment "${env}" platform --region us-west-2 && kube-setup
+  aws-environment "${env}" platform --region us-west-2 &&
+    use-cluster "${cluster_prefix}" us-west-2 &&
+    kube-setup
 }
 
 east() {
+  local env cluster_prefix
   env=${1:-uat}
+  cluster_prefix=${2:-service-}
   case ${env} in
   i3)   env="integration3"
   esac
-  aws-environment "${env}" platform --region us-east-1 && kube-setup
+  aws-environment "${env}" platform --region us-east-1 &&
+    use-cluster "${cluster_prefix}" us-east-1 &&
+    kube-setup
 }
 
 dod() {
   aws-environment "dod" --region us-east-1 && kube-setup
+}
+
+# Point kubectl at the sole EKS cluster in $region whose name starts with $prefix.
+# Requires current AWS credentials for that account. Fails if 0 or 2+ clusters match.
+use-cluster() {
+  local prefix region json matches=() name
+  prefix="${1:?usage: use-cluster <name-prefix> [region]}"
+  region="${2:-${AWS_REGION:-${AWS_DEFAULT_REGION}}}"
+  if [[ -z "$region" ]]; then
+    echo "use-cluster: set AWS_REGION or pass region as second argument" >&2
+    return 1
+  fi
+  json=$(aws eks list-clusters --region "$region" --output json) || {
+    echo "use-cluster: aws eks list-clusters failed" >&2
+    return 1
+  }
+  while IFS= read -r name; do
+    [[ -n "$name" ]] && matches+=("$name")
+  done < <(jq -r --arg p "$prefix" '.clusters[] | select(startswith($p))' <<<"$json")
+
+  if ((${#matches[@]} == 0)); then
+    echo "use-cluster: no cluster in ${region} starts with ${prefix}" >&2
+    return 1
+  fi
+  if ((${#matches[@]} > 1)); then
+    echo "use-cluster: ambiguous prefix ${prefix} (${#matches[@]} clusters):" >&2
+    printf '  %s\n' "${matches[@]}" >&2
+    return 1
+  fi
+  aws eks update-kubeconfig --name "${matches[0]}" --region "$region"
 }
 
 dpw() {
