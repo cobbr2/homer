@@ -47,5 +47,5 @@ instance_from_node() {
 
 pd_env() {
   aws-environment --region $tng_region $tng_environment platform
-  kube-setup
+  use-cluster service- "$tng_region"
 }

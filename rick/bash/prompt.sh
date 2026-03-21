@@ -11,59 +11,32 @@ if [ -n "$CURSOR_AGENT" ] || [ -n "$CURSOR_TRACE_ID" ]; then
 fi
 
 prompt_function() {
-  local        BLUE='\[\033[0;34m\]'
-  local         RED='\[\033[0;31m\]'
-  local   LIGHT_RED='\[\033[1;31m\]'
-  local       GREEN='\[\033[0;32m\]'
-  local LIGHT_GREEN='\[\033[1;32m\]'
-  local      YELLOW='\[\033[0;33m\]'
-  local       WHITE='\[\033[1;37m\]'
-  local  LIGHT_GRAY='\[\033[0;37m\]'
-  local        GRAY='\[\033[1;30m\]'
-  local       RESET='\[\033[0m\]'
-  local TITLE_START='\[\033]0;'
-  local   TITLE_END='\007\]'
+  # SGR via _colorize / red / green / …; _COLORIZE_PS1 wraps escapes for PS1.
+  # \u \h \w in arguments stay literal through $(…) and are expanded when bash
+  # draws the prompt (not inside _colorize).
+  export _COLORIZE_PS1=1
 
-  # Remember that \[ and \] must enclose all control code sequences; that's
-  # what allows bash to figure out what column it's in.
-
-  # previous_return_value=$?;
-  # case $previous_return_value in
-  #   0)
-  #     prompt_color="${RESET}"
-  #   ;;
-  #   1)
-  #     prompt_color="${LIGHT_RED}"
-  #   ;;
-  #   *)
-  #     prompt_color="${LIGHT_YELLOW}"
-  #   ;;
-  # esac
-  # use "${prompt_color}\$${RESET}" instead of "\$" below
-  local aws_env="${AWS_ENVIRONMENT}"
-  local aws_color_off="\[$(tput sgr 0)\]"
-  local aws_color
+  local aws_env="${AWS_ENVIRONMENT}" aws_sgr
   case "${aws_env}" in
     *production*)
-      aws_color="$(tput setab 1)$(tput setaf 255)" # Red with bright white letters
+      aws_sgr='41;1;37' # red bg, bold white fg (was tput setab 1 + setaf 255)
       ;;
     *dod*)
-      aws_color="$(tput setab 172)" # Orange
+      aws_sgr='48;5;172' # orange (tput 172)
       ;;
     *uat*)
-      aws_color="$(tput setab 3)" # Yellow/orange
+      aws_sgr='43' # yellow bg
       ;;
     *integration3*)
-      aws_color="$(tput setab 4)$(tput setaf 255)" # Blue with bright white letters
+      aws_sgr='44;1;37' # blue bg, bold white fg
       ;;
     *dev*)
-      aws_color="$(tput sgr 0)" # Nada
+      aws_sgr='0'
       ;;
     *)
-      aws_color="$(tput setab 7)" # Grey
+      aws_sgr='47;30' # grey bg, black fg (was setab 7)
       ;;
   esac
-  aws_color_on="\[${aws_color}\]"
 
   case "${AWS_REGION}" in
     us-east-1)
@@ -77,27 +50,44 @@ prompt_function() {
       ;;
   esac
 
-  local git_color
+  local BRANCH git_styled TITLE_START TITLE_END STATUS
+  local k8s_raw k8s_short k8s_sgr k8s_indic=""
+
+  BRANCH=$(__git_ps1)
   if [[ "${PWD}" =~ /potluck ]] ; then
-    git_color="\[${YELLOW}\]"
+    git_styled="$(yellow "${BRANCH}")"
   elif test $(git status -u 2> /dev/null | grep -c :) -eq 0; then
-    git_color="\[${GREEN}\]"
+    git_styled="$(green "${BRANCH}")"
   else
-    git_color="\[${RED}\]"
+    git_styled="$(red "${BRANCH}")"
   fi
 
-  local K8S_CTX=$(kubectl config current-context)
-  local K8S_INDIC=""
-  case "${aws_env}" in
-  *"${K8S_CTX}"* ) K8S_INDIC="\[${GREEN}\]✓${RESET}" ;;
-  * )   K8S_INDIC="\[${RED}\]${K8S_CTX}${RESET}" ;;
-  esac
+  # Current EKS cluster from kubeconfig only (no AWS API); one kubectl parse per prompt.
+  k8s_raw=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null)
+  if [[ -n "$k8s_raw" ]]; then
+    if [[ "$k8s_raw" == arn:aws:eks:* ]]; then
+      k8s_short="${k8s_raw##*/}"
+    else
+      k8s_short="$k8s_raw"
+    fi
+    case "$k8s_short" in
+      service-*)      k8s_sgr='42;30' ;;       # green bg / black fg (light terminals)
+      compute*)       k8s_sgr='43;30' ;;       # yellow bg / black fg
+      observability*) k8s_sgr='44;97' ;;      # blue bg / white fg
+      management*)    k8s_sgr='41;1;37' ;;   # red bg / bold white fg
+      *)              k8s_sgr='48;5;208;30' ;; # orange(ish) bg / black fg
+    esac
+    k8s_indic="$(_colorize "${k8s_sgr}" " ${k8s_short}")"
+  fi
 
-  local BRANCH=$(__git_ps1)
-  local STATUS="${RESET}\[$aws_color_on\]\u@\h${region_arrow}\[${aws_color_off}\]${K8S_INDIC}${git_color}${BRANCH}${RESET} \w${TITLE_START}\w${TITLE_END}"
+  TITLE_START="$(ps1_title_start)"
+  TITLE_END="$(ps1_title_end)"
+  STATUS="$(plain)$(_colorize "${aws_sgr}" "\u@\h${region_arrow}")${k8s_indic}${git_styled} \w${TITLE_START}\w${TITLE_END}"
 
   PS1="${STATUS}
 \$ "
+
+  unset _COLORIZE_PS1
 }
 PROMPT_COMMAND=prompt_function
 

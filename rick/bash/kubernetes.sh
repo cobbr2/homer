@@ -4,7 +4,7 @@ alias k=kubectl
 alias kp='kubectl -n platform'
 #aws-environment () {
 #  use_sso=1
-#  gr::aws_environment::main "$@" && kube-setup
+#  gr::aws_environment::main "$@" && use-cluster service- "${AWS_REGION:-$AWS_DEFAULT_REGION}"
 #}
 
 # Make idempotent!

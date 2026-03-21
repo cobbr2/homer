@@ -426,9 +426,9 @@ west() {
   case ${env} in
   i3)   env="integration3"
   esac
+  # use-cluster runs aws eks update-kubeconfig (IAM auth + current context); no kube-setup.
   aws-environment "${env}" platform --region us-west-2 &&
-    use-cluster "${cluster_prefix}" us-west-2 &&
-    kube-setup
+    use-cluster "${cluster_prefix}" us-west-2
 }
 
 east() {
@@ -439,12 +439,13 @@ east() {
   i3)   env="integration3"
   esac
   aws-environment "${env}" platform --region us-east-1 &&
-    use-cluster "${cluster_prefix}" us-east-1 &&
-    kube-setup
+    use-cluster "${cluster_prefix}" us-east-1
 }
 
 dod() {
-  aws-environment "dod" --region us-east-1 && kube-setup
+  local cluster_prefix=${1:-service-}
+  aws-environment "dod" --region us-east-1 &&
+    use-cluster "${cluster_prefix}" us-east-1
 }
 
 # Point kubectl at the sole EKS cluster in $region whose name starts with $prefix.
@@ -474,7 +475,10 @@ use-cluster() {
     printf '  %s\n' "${matches[@]}" >&2
     return 1
   fi
-  aws eks update-kubeconfig --name "${matches[0]}" --region "$region"
+  mkdir -p "${HOME}/.kube"
+  aws eks update-kubeconfig --name "${matches[0]}" --region "$region" || return 1
+  [[ -f "${HOME}/.kube/config" ]] && chmod go-rw "${HOME}/.kube/config"
+  export KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 }
 
 dpw() {
