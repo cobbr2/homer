@@ -54,16 +54,23 @@ prompt_function() {
   local k8s_raw k8s_short k8s_sgr k8s_indic=""
 
   BRANCH=$(__git_ps1)
-  if [[ "${PWD}" =~ /potluck ]] ; then
-    git_styled="$(yellow "${BRANCH}")"
-  elif test $(git status -u 2> /dev/null | grep -c :) -eq 0; then
+  # Tradeoff: by not going red for untracked files, this is fast
+  # enough to run in "potluck".
+  if [[ -z "$(git status --porcelain -uno 2>/dev/null)" ]]; then
     git_styled="$(green "${BRANCH}")"
   else
     git_styled="$(red "${BRANCH}")"
   fi
 
-  # Current EKS cluster from kubeconfig only (no AWS API); one kubectl parse per prompt.
-  k8s_raw=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null)
+  # Read current-context directly from kubeconfig — avoids spawning the full kubectl
+  # binary (~250ms) every prompt paint. For EKS contexts (created by aws eks
+  # update-kubeconfig) the context name IS the cluster ARN, so this gives the
+  # same color-coding result. Non-EKS contexts with aliased names (e.g.
+  # "production-us-east-1") also work because the color case-statement uses broad
+  # globs (*production*, *uat*, etc.) that match context names just as well.
+  local _kubeconfig="${KUBECONFIG%%:*}"
+  _kubeconfig="${_kubeconfig:-$HOME/.kube/config}"
+  k8s_raw=$(awk '/^current-context:/{print $2; exit}' "$_kubeconfig" 2>/dev/null)
   if [[ -n "$k8s_raw" ]]; then
     if [[ "$k8s_raw" == arn:aws:eks:* ]]; then
       k8s_short="${k8s_raw##*/}"
