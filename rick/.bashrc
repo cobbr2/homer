@@ -85,3 +85,5 @@ timed_source $HOME/.asdf/completions/asdf.bash
 
 # This loads the Included Health shell augmentations into your interactive shell
 timed_source "$HOME/.ih/augment.sh"
+export PATH="$HOME/bin:$HOME/apache-kafka-tools/bin:$PATH"
+export KAFKA_CLIENT_CONFIG="$HOME/apache-kafka-tools/client.properties"

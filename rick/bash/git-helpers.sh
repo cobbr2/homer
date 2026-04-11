@@ -119,11 +119,11 @@ branch_cleanup () {
   if [ -n "$1" ] ; then
     branch_excludes="grep -v ${1}"
   fi
-  pushd $(git_root)
+  pushd $(git_root) >/dev/null
   git remote update --prune
   local master=$(main_branch)
   if [ $? != 0 -o -z "${master}" ] ; then
-    popd; return 1
+    popd >/dev/null; return 1
   fi
   _cleanup_stale_worktrees
   if git switch "$master" 2>/dev/null; then
@@ -135,7 +135,7 @@ branch_cleanup () {
     echo "Note: $master checked out in another worktree; cleaning merged branches from here."
     git branch --merged "origin/$master" | grep -v '^\*' | _exclude_worktree_branches | ${branch_excludes} | xargs -L 1 -r git branch -d
   fi
-  popd
+  popd >/dev/null
 }
 
 # Use this b4 branch_cleanup; branch_cleanup will kill the state necessary for this to work.

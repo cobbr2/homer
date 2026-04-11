@@ -188,6 +188,35 @@ _find_all_in_monorepo() {
   done
 }
 
+_work_prepare() {
+  git rev-parse --git-dir >/dev/null 2>&1 || return 0
+
+  local default_branch current_branch
+  default_branch=$(main_branch 2>/dev/null) || return 0
+  current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
+
+  [ "$current_branch" = "$default_branch" ] || return 0
+
+  local porcelain
+  porcelain=$(git status --porcelain 2>/dev/null)
+
+  # If anything other than tng.yaml has changes, leave the repo alone
+  local other_changes
+  other_changes=$(printf '%s\n' "$porcelain" | grep -v '^$' | grep -v 'tng\.yaml$')
+  [ -z "$other_changes" ] || return 0
+
+  # Discard tng.yaml if present (untracked vs. modified need different commands)
+  if printf '%s\n' "$porcelain" | grep -q 'tng\.yaml$'; then
+    if printf '%s\n' "$porcelain" | grep -q '^?? .*tng\.yaml$'; then
+      git clean -f tng.yaml
+    else
+      git restore tng.yaml
+    fi
+  fi
+
+  branch-cleanup
+}
+
 work() {
   local prefer_source="${2:-}"  # Optional second arg: "source" or "src" to prefer source dirs
   case "${1}" in
@@ -231,6 +260,7 @@ work() {
     ;;
   esac
   pushd "$dir"
+  _work_prepare
 }
 
 # Variant of work that prefers source directories over containers

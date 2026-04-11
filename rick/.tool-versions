@@ -19,7 +19,7 @@ python 3.12.13
 ripgrep 13.0.0
 ruby 2.7.2
 shellcheck 0.8.0
-terraform 1.7.0
+terraform 1.14.8
 yq 4.40.4
 mkcert 1.4.4
 uv 0.8.22
