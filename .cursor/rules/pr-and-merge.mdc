@@ -1,0 +1,12 @@
+---
+description: GitHub PR workflow; when to nudge the user vs merge
+alwaysApply: true
+---
+
+# Pull requests and merging
+
+- **Base branch:** Every PR must target **`master`** on the **canonical** remote (this workflow: `origin` → `cobbr2/<repo>`). Do **not** open or assume PRs against **`48clyde`** (or other secondary remotes); we are not building the review/merge path there.
+- We use **PR discipline** for changes that should land on `master` (branch protection may require it).
+- After pushing a feature branch, it is **OK** to tell the user clearly: the PR (or ready-to-PR work) is on GitHub—**go to the repo, review, and merge** (or open the PR if it is not open yet). Do not assume the user has time to run `gh` or wants automation every time.
+- The user can **anytime** say to go ahead and merge (with or without their review, or to merge on their behalf if tooling allows). If they say to merge, use normal Git/GitHub flow (`gh pr merge`, or instructions they follow on the web) without asking again for the same permission.
+- If `gh` is not available, authenticated, or suitable, default to **“here is the link / branch name; merge on GitHub”** rather than blocking on automation.
