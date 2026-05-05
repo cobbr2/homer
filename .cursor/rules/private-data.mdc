@@ -1,0 +1,19 @@
+---
+description: Where private or secret material must go; homer is public
+alwaysApply: true
+---
+
+# Private data (homer is a public GitHub repo)
+
+- **Do not** commit credentials, API keys, production auth flows, full dumps of
+  application prefs that tie to real accounts, or host-specific secrets into
+  **homer** (or any other public repo in this workspace without explicit opt-in).
+- Put that material under **`~/private/`** on this machine, in **well-named
+  subdirectories** by topic or system (e.g. `~/private/spotty-newsounds/`,
+  `~/private/<project>-backups/`). Summaries, redacted notes, and procedural docs
+  can stay in **homer** when they contain no secrets or stable identifiers.
+- When the user asks to **save a snapshot** of something sensitive, default to
+  **`~/private/<topic>/`** and give them the path; do not park it under `homer/docs/`
+  unless they confirm the content is safe for public GitHub.
+- The user may use a **separate project** for backup automation; that work should
+  also respect this split (public instructions vs private payloads in `~/private/`).

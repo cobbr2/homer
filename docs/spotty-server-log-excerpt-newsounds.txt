@@ -1,0 +1,31 @@
+# server.log excerpts — newsounds, path on host: /home/rec/Music/state/logs/server.log
+# Lyrion in Docker; player Office b8:27:eb:2c:c1:7a (PiCorePlayer / squeezelite)
+# One Spotify track used in several lines: spotify://track:5kKw0R6ir23CfHqjUUZrzo
+
+--- Matched + Song::open (spt->flc → spotty | flac), same track ---
+[26-05-04 03:00:45.0850] Slim::Player::TranscodingHelper::getConvertCommand2 (494) Matched: spt->flc via: TMPDIR=/config/cache/spotty [spotty-x86_64] --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track $URL$ --bitrate 96 --disable-discovery --disable-audio-cache $START$ | [flac] -cs --channels=2 --sample-rate=44100 --bps=16 --endian=little --sign=signed --fast --totally-silent --ignore-chunk-sizes -
+[26-05-04 03:00:45.0935] Slim::Player::Song::open (588) Tokenized command: TMPDIR=/config/cache/spotty "/config/cache/InstalledPlugins/Plugins/Spotty/Bin/i386-linux/spotty-x86_64" --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track "spotify://track:5kKw0R6ir23CfHqjUUZrzo" --bitrate 96 --disable-discovery --disable-audio-cache | "/lms/Bin/x86_64-linux/flac" -cs --channels=2 --sample-rate=44100 --bps=16 --endian=little --sign=signed --fast --totally-silent --ignore-chunk-sizes -
+
+--- Same pattern repeated on later play (confirms stable pipeline string) ---
+[26-05-04 03:06:43.1077] Slim::Player::TranscodingHelper::getConvertCommand2 (494) Matched: spt->flc via: TMPDIR=/config/cache/spotty [spotty-x86_64] --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track $URL$ --bitrate 96 --disable-discovery --disable-audio-cache $START$ | [flac] -cs --channels=2 --sample-rate=44100 --bps=16 --endian=little --sign=signed --fast --totally-silent --ignore-chunk-sizes -
+[26-05-04 03:06:43.1160] Slim::Player::Song::open (588) Tokenized command: TMPDIR=/config/cache/spotty "/config/cache/InstalledPlugins/Plugins/Spotty/Bin/i386-linux/spotty-x86_64" --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track "spotify://track:5kKw0R6ir23CfHqjUUZrzo" --bitrate 96 --disable-discovery --disable-audio-cache | "/lms/Bin/x86_64-linux/flac" -cs --channels=2 --sample-rate=44100 --bps=16 --endian=little --sign=signed --fast --totally-silent --ignore-chunk-sizes -
+
+--- Player stuck buffering (FLAC target 261120 bytes); Office MAC ---
+[26-05-04 03:09:49.5976] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:09:49.9013] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:09:50.2060] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:09:50.5115] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:09:50.8166] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:10:01.4945] Slim::Player::Player::_buffering (1161) Buffering... 0 / 261120
+[26-05-04 03:10:01.4998] Slim::Player::StreamingController::_eventAction (271) b8:27:eb:2c:c1:7a: StatusHeartbeat in BUFFERING-STREAMING -> Slim::Player::StreamingController::_NoOp
+
+--- Source: no decoded audio (sample during FLAC attempt earlier same evening) ---
+[26-05-04 02:57:50.8906] Slim::Player::Source::_readNextChunk (315) Sending 0 bytes of silence.
+[26-05-04 02:57:51.3819] Slim::Player::Source::_readNextChunk (315) Sending 0 bytes of silence.
+[26-05-04 02:57:52.2584] Slim::Player::Source::_readNextChunk (315) Sending 0 bytes of silence.
+[26-05-04 02:57:53.0735] Slim::Player::Source::_readNextChunk (315) Sending 0 bytes of silence.
+[26-05-04 02:57:54.3020] Slim::Player::Source::_readNextChunk (315) Sending 0 bytes of silence.
+
+--- MP3 path (spt->mp3) for comparison — different tracks ---
+[26-05-04 02:43:14.3516] Slim::Player::TranscodingHelper::getConvertCommand2 (494) Matched: spt->mp3 via: TMPDIR=/config/cache/spotty [spotty-x86_64] --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track $URL$ --bitrate 96 --disable-discovery --disable-audio-cache $START$ | [lame] -r --silent -q $QUALITY$ $BITRATE$ - -
+[26-05-04 02:43:14.3600] Slim::Player::Song::open (588) Tokenized command: TMPDIR=/config/cache/spotty "/config/cache/InstalledPlugins/Plugins/Spotty/Bin/i386-linux/spotty-x86_64" --enable-volume-normalisation  -n Squeezebox -c "/config/cache/spotty/2c2f282d" --single-track "spotify://track:2MNorBnoEH85DAIfHMKJJV" --bitrate 96 --disable-discovery --disable-audio-cache | "/lms/Bin/x86_64-linux/lame" -r --silent -q 9 - -
