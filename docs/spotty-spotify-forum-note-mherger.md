@@ -11,6 +11,8 @@ Environment (2026-05)
   Players: PiCorePlayer / squeezelite (e.g. Office, MAC b8:27:eb:2c:c1:7a). Local library FLAC plays fine on the same players, so this is not a generic “dead player” path.
   EXTRA_ARGS: --advertiseaddr=<LAN IP> so SlimProto advertises on the correct interface.
 
+Follow-up — production stance (still valid after the outage was traced to account class): Spotty PCM is intentionally disabled in LMS File Types (server.prefs disabledformats includes spt-pcm-*-*); we keep the FLAC row as the usual Spotty transcoding target. Re-enable PCM only if you deliberately want to test or run that branch.
+
 Symptom
 
   Spotify browsing and metadata work.
