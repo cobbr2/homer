@@ -16,3 +16,9 @@
 	insteadOf = https://github.com/ConsultingMD/
 [init]
 	templateDir = /Users/rick.cobb/.ih/git-template
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

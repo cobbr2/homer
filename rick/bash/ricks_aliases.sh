@@ -111,25 +111,25 @@ _find_in_monorepo() {
   local alt_name="${name//-/}"    # Remove hyphens: loading-dock -> loadingdock
   local alt_name2="${name//_/-}"  # Underscores to hyphens
   local found=""
-  
+
   # Build search paths based on preference
   local kafka_paths=(
     "${IH_HOME}/kafka/platform/${name}"
     "${IH_HOME}/kafka/docker/${name}"
   )
-  
+
   local potluck_container_paths=(
     "${IH_HOME}/potluck/platform/${name}"
     "${IH_HOME}/potluck/containers/${name}"
   )
-  
+
   local potluck_source_paths=(
     "${IH_HOME}/potluck/scala/src/main/com/grandrounds/${name}"
     "${IH_HOME}/potluck/python/${name}"
     "${IH_HOME}/potluck/go/${name}"
     "${IH_HOME}/potluck/java/src/main/com/grandrounds/${name}"
   )
-  
+
   # Also check alternate names (without hyphens)
   if [ "${alt_name}" != "${name}" ]; then
     potluck_source_paths+=(
@@ -141,7 +141,7 @@ _find_in_monorepo() {
       "${IH_HOME}/potluck/containers/${alt_name}"
     )
   fi
-  
+
   # Order search based on preference
   local search_order=()
   if [ "${prefer}" = "source" ]; then
@@ -149,14 +149,14 @@ _find_in_monorepo() {
   else
     search_order=("${kafka_paths[@]}" "${potluck_container_paths[@]}" "${potluck_source_paths[@]}")
   fi
-  
+
   for path in "${search_order[@]}"; do
     if [ -d "${path}" ]; then
       echo "${path}"
       return 0
     fi
   done
-  
+
   return 1
 }
 
@@ -166,7 +166,7 @@ _find_all_in_monorepo() {
   local alt_name="${name//-/}"
   local names=("${name}")
   [ "${alt_name}" != "${name}" ] && names+=("${alt_name}")
-  
+
   local all_patterns=(
     "${IH_HOME}/kafka/platform"
     "${IH_HOME}/kafka/docker"
@@ -177,7 +177,7 @@ _find_all_in_monorepo() {
     "${IH_HOME}/potluck/go"
     "${IH_HOME}/potluck/java/src/main/com/grandrounds"
   )
-  
+
   for n in "${names[@]}"; do
     for base in "${all_patterns[@]}"; do
       local path="${base}/${n}"
@@ -296,7 +296,7 @@ work-refresh() {
     local IH="${IH_HOME:-$HOME/ih_home}"
     local cache_dir="${HOME}/.cache"
     [ -d "$cache_dir" ] || mkdir -p "$cache_dir"
-    
+
     # Build worktree path mapping (basename -> absolute path).
     # Reads gitdir files directly — no git commands, pure filesystem.
     > "${_WORKTREE_CACHE}"
@@ -307,23 +307,23 @@ work-refresh() {
         wt_dir=$(dirname "$wt_git_path")
         echo "$(basename "$wt_dir"):${wt_dir}" >> "${_WORKTREE_CACHE}"
     done
-    
+
     {
         # Top-level ih_home directories
         if [ -d "${IH}" ]; then
             ls -1 "${IH}" 2>/dev/null
         fi
-        
+
         # Kafka pseudo-monorepo
         for base in "${IH}/kafka/platform" "${IH}/kafka/docker"; do
             [ -d "$base" ] && ls -1 "$base" 2>/dev/null
         done
-        
+
         # Potluck containers/platform
         for base in "${IH}/potluck/containers" "${IH}/potluck/platform"; do
             [ -d "$base" ] && ls -1 "$base" 2>/dev/null
         done
-        
+
         # Potluck source directories
         for base in "${IH}/potluck/scala/src/main/com/grandrounds" \
                     "${IH}/potluck/python" \
@@ -342,7 +342,7 @@ work-refresh() {
             cut -d: -f1 "${_WORKTREE_CACHE}"
         fi
     } | grep -v '^_' | sort -u > "${_WORK_CACHE}"
-    
+
     local wt_count=0
     [ -s "${_WORKTREE_CACHE}" ] && wt_count=$(wc -l < "${_WORKTREE_CACHE}")
     echo "Refreshed work completions cache: $(wc -l < "${_WORK_CACHE}") entries (${wt_count} worktrees)"
@@ -350,7 +350,7 @@ work-refresh() {
 
 _work_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
-    
+
     # If cache doesn't exist, generate it in background and use slow path once
     if [ ! -f "${_WORK_CACHE}" ]; then
         # Generate cache in background for next time
@@ -360,7 +360,7 @@ _work_complete() {
         COMPREPLY=( $(compgen -W "$(ls -1 "${IH}" 2>/dev/null)" -- "$cur") )
         return
     fi
-    
+
     # Detect worktree additions/removals (catches IDE-created worktrees; ~10ms)
     local IH="${IH_HOME:-$HOME/ih_home}"
     local wt_now=0 cached_wt=0
@@ -517,4 +517,8 @@ dpw() {
   i3)   env="integration3"
   esac
   pushd ${IH_HOME}/DPW/terraforming/grnds-environments/${env}
+}
+
+soft-reset() {
+  printf '\e[?2004l'
 }

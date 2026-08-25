@@ -6,7 +6,7 @@ golangci-lint 2.1.6
 gomigrate 4.17.0
 helm 3.20.0
 istioctl 1.23.0
-java corretto-8.432.06.1
+java openjdk-18.0.2
 jq 1.6
 kubectl 1.24.13
 nodejs 24.14.0
@@ -19,7 +19,7 @@ python 3.12.13
 ripgrep 13.0.0
 ruby 2.7.2
 shellcheck 0.8.0
-terraform 1.14.8
+terraform 1.7.0
 yq 4.40.4
 mkcert 1.4.4
 uv 0.8.22

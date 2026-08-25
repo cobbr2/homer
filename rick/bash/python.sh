@@ -1,2 +1,2 @@
-path_push /home/rcobb/.local/bin
+path_push $HOME/.local/bin
 export PYTHONDONTWRITEBYTECODE=1
