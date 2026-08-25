@@ -114,6 +114,24 @@ _exclude_worktree_branches() {
 
 # --- Branch cleanup functions ---
 
+# Emit local branch names whose content is already present in <upstream>
+# (default origin/main). Unlike `git branch --merged`, this detects squash-
+# and rebase-merges: it builds a throwaway commit with the branch's tree on
+# top of the merge-base, then asks `git cherry` whether that patch is already
+# upstream. Ancestry is irrelevant, so a squash-merged branch is recognized.
+_content_merged_branches() {
+  local upstream="${1:-origin/main}"
+  local branch mb synth
+  git for-each-ref --format='%(refname:short)' refs/heads/ | while read -r branch; do
+    [ "$branch" = "${upstream#origin/}" ] && continue
+    mb=$(git merge-base "$upstream" "$branch" 2>/dev/null) || continue
+    synth=$(git commit-tree "$branch^{tree}" -p "$mb" -m _ 2>/dev/null) || continue
+    if [ "$(git cherry "$upstream" "$synth" 2>/dev/null | cut -c1)" = "-" ]; then
+      printf '%s\n' "$branch"
+    fi
+  done
+}
+
 branch_cleanup () {
   local branch_excludes=cat
   if [ -n "$1" ] ; then
@@ -126,42 +144,24 @@ branch_cleanup () {
     popd >/dev/null; return 1
   fi
   _cleanup_stale_worktrees
+  # Fast-forward local main when it isn't checked out in another worktree.
   if git switch "$master" 2>/dev/null; then
     git merge "origin/$master"
-    # At GR, don't push the deletion to remote, since
-    # we delete branches on merge.
-    git branch --merged | grep -v '^\*' | _exclude_worktree_branches | ${branch_excludes} | xargs -L 1 -r git branch -d
   else
-    echo "Note: $master checked out in another worktree; cleaning merged branches from here."
-    git branch --merged "origin/$master" | grep -v '^\*' | _exclude_worktree_branches | ${branch_excludes} | xargs -L 1 -r git branch -d
+    echo "Note: $master checked out in another worktree; cleaning from here."
   fi
+  # Delete every branch whose content is already in origin/$master, including
+  # squash- and rebase-merges. Detection is by patch content, so we force with
+  # `git branch -D` (`-d` only trusts ancestry and would refuse a squash-merge).
+  # The current branch and any worktree branches are excluded by
+  # _exclude_worktree_branches. At GR we don't push the deletion to remote;
+  # branches are deleted there on merge.
+  _content_merged_branches "origin/$master" \
+    | _exclude_worktree_branches \
+    | ${branch_excludes} \
+    | xargs -L 1 -r git branch -D
   popd >/dev/null
 }
-
-# Use this b4 branch_cleanup; branch_cleanup will kill the state necessary for this to work.
-squashmerge_cleanup() {(
-  local branch_excludes=cat
-  if [ -n "$1" ] ; then
-    branch_excludes="grep -v ${1}"
-  fi
-  pushd $(git_root)
-  git remote update
-  local master=$(main_branch)
-  if [ $? != 0 -o -z "${master}" ] ; then
-    popd; return 1
-  fi
-  _cleanup_stale_worktrees
-  if ! git switch "$master" 2>/dev/null; then
-    echo "Note: $master checked out in another worktree; detaching HEAD."
-    git checkout --detach
-  fi
-  git remote prune --dry-run origin |\
-    sed -n 's;^.*origin/;;gp' |\
-    _exclude_worktree_branches |\
-    ${branch_excludes} |\
-    xargs -L1 -r git branch -D
-  popd
-)}
 
 # prune removes any branches that have deleted upstreams. Doesn't
 # care about merge status, so can be dangerous -- it'll get rid of
