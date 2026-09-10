@@ -500,13 +500,34 @@ use-cluster() {
     echo "use-cluster: no cluster in ${region} starts with ${prefix}" >&2
     return 1
   fi
-  if ((${#matches[@]} > 1)); then
-    echo "use-cluster: ambiguous prefix ${prefix} (${#matches[@]} clusters):" >&2
-    printf '  %s\n' "${matches[@]}" >&2
-    return 1
+
+  local target status active=() name_status
+  if ((${#matches[@]} == 1)); then
+    target="${matches[0]}"
+  else
+    # Blue/green: exactly one candidate should carry the InUse=true tag
+    # (set via `cloudctl eks set-status`); prefer it when the prefix is ambiguous.
+    for name in "${matches[@]}"; do
+      status=$(aws eks describe-cluster --name "$name" --region "$region" \
+        --query 'cluster.tags.InUse' --output text 2>/dev/null)
+      [[ "$status" == "true" ]] && active+=("$name")
+    done
+    if ((${#active[@]} == 1)); then
+      target="${active[0]}"
+      echo "use-cluster: multiple matches for ${prefix}, selected active cluster ${target}" >&2
+    else
+      echo "use-cluster: ambiguous prefix ${prefix} (${#matches[@]} clusters):" >&2
+      for name in "${matches[@]}"; do
+        name_status="standby"
+        for a in "${active[@]}"; do [[ "$a" == "$name" ]] && name_status="ACTIVE"; done
+        printf '  %s (%s)\n' "$name" "$name_status" >&2
+      done
+      return 1
+    fi
   fi
+
   mkdir -p "${HOME}/.kube"
-  aws eks update-kubeconfig --name "${matches[0]}" --region "$region" || return 1
+  aws eks update-kubeconfig --name "${target}" --region "$region" || return 1
   [[ -f "${HOME}/.kube/config" ]] && chmod go-rw "${HOME}/.kube/config"
   export KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
 }

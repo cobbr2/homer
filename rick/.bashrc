@@ -79,9 +79,7 @@ PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}
 PERL_MB_OPT="--install_base \"${HOME}/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5"; export PERL_MM_OPT;
 
-timed_source $HOME/.asdf/asdf.sh
-
-timed_source $HOME/.asdf/completions/asdf.bash
+eval "$(mise activate bash)"
 
 # This loads the Included Health shell augmentations into your interactive shell
 timed_source "$HOME/.ih/augment.sh"

@@ -83,4 +83,8 @@ fabric.properties
 *~
 
 # Rick's old COSI convention
-_*
+# _*
+# New convention: use dirs called tmp
+tmp/
+
+**/.claude/settings.local.json
